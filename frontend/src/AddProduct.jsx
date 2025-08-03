@@ -19,10 +19,6 @@ const categoriesList = [
   "Smart Camera",
   "Smart Doorbell",
   "Smart Security",
-  "Smart Thermostat",
-  "Smart Camera",
-  "Smart Doorbell",
-  "Smart Security",
 ];
 
 export default function AddProduct() {
