@@ -29,6 +29,10 @@ npm run dev
 
 See each folder's README for more details.
 
+## Documentation
+
+Comprehensive API and frontend component guides are available in the [`docs`](docs/) directory.
+
 ## Backend Stack
 
 The backend uses:
