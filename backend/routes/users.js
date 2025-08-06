@@ -32,7 +32,7 @@ const adminOnly = (req, res, next) => {
 // GET /api/users - List all users
 router.get("/users", protect, adminOnly, async (req, res) => {
   try {
-    const users = await User.find({}, "_id name username email role createdAt");
+    const users = await User.find({}, "_id name email role createdAt");
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch users" });
@@ -42,17 +42,17 @@ router.get("/users", protect, adminOnly, async (req, res) => {
 // POST /api/users - Add a new user
 router.post("/users", protect, adminOnly, async (req, res) => {
   try {
-    const { name, username, email, password, role } = req.body;
-    if (!name || !username || !email || !password || !role) {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password || !role) {
       return res.status(400).json({ error: "All fields are required" });
     }
-    const existing = await User.findOne({ $or: [{ email }, { username }] });
+    const existing = await User.findOne({ email });
     if (existing) {
-      return res.status(409).json({ error: "Email or username already registered" });
+      return res.status(409).json({ error: "Email already registered" });
     }
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, username, email, password: hashed, role });
-    res.status(201).json({ id: user._id, name: user.name, username: user.username, email: user.email, role: user.role });
+    const user = await User.create({ name, email, password: hashed, role });
+    res.status(201).json({ id: user._id, name: user.name, email: user.email, role: user.role });
   } catch (err) {
     res.status(500).json({ error: "Failed to add user" });
   }
@@ -61,8 +61,8 @@ router.post("/users", protect, adminOnly, async (req, res) => {
 // PUT /api/users/:id - Edit a user
 router.put("/users/:id", protect, adminOnly, async (req, res) => {
   try {
-    const { name, username, email, password, role } = req.body;
-    const update = { name, username, email, role };
+    const { name, email, password, role } = req.body;
+    const update = { name, email, role };
     if (password) {
       update.password = await bcrypt.hash(password, 10);
     }
@@ -70,7 +70,7 @@ router.put("/users/:id", protect, adminOnly, async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json({ id: user._id, name: user.name, username: user.username, email: user.email, role: user.role });
+    res.json({ id: user._id, name: user.name, email: user.email, role: user.role });
   } catch (err) {
     res.status(500).json({ error: "Failed to update user" });
   }
