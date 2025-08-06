@@ -1,11 +1,32 @@
 import React from "react";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 
-export default function UiCard({ children, className = "", ...props }) {
+export default function UiCard({ children, className = "", variant = "default", ...props }) {
+  const getVariantClasses = () => {
+    switch (variant) {
+      case "strong":
+        return "glass-strong";
+      case "subtle":
+        return "glass-subtle";
+      case "dark":
+        return "glass-dark";
+      default:
+        return "glass";
+    }
+  };
+
   return (
-    <Card className={`rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 ${className}`.trim()} {...props}>
-      <CardContent className="p-8">{children}</CardContent>
-    </Card>
+    <div
+      className={`
+        ${getVariantClasses()}
+        glass-hover
+        rounded-2xl 
+        transition-all 
+        duration-300 
+        ${className}
+      `.trim()}
+      {...props}
+    >
+      <div className="p-8 text-glass">{children}</div>
+    </div>
   );
 }

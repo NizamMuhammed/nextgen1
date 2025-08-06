@@ -35,30 +35,62 @@ export default function SignupForm({ onSignup, switchToLogin }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow w-full max-w-sm space-y-6 flex flex-col">
-      <h2 className="text-2xl font-bold text-center mb-2">Sign Up</h2>
-      <UiTextField label="Name" name="name" value={form.name} onChange={handleChange} required />
-      <UiTextField label="Username" name="username" value={form.username} onChange={handleChange} required />
-      <UiTextField label="Email" name="email" type="email" value={form.email} onChange={handleChange} required />
-      <UiTextField label="Password" name="password" type="password" value={form.password} onChange={handleChange} required />
-      <div>
-        <label className="block text-sm font-medium mb-1">Role</label>
-        <select name="role" value={form.role} onChange={handleChange} className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-          <option value="customer">Customer</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
-      {error && <div className="text-red-500 text-sm text-center">{error}</div>}
-      {success && <div className="text-green-600 text-sm text-center">{success}</div>}
-      <UiButton type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
-        {loading ? "Signing up..." : "Sign Up"}
-      </UiButton>
-      <div className="text-center text-sm mt-2">
-        Already have an account?{" "}
-        <UiButton variant="text" color="primary" size="small" onClick={switchToLogin} sx={{ textTransform: "none", fontWeight: 600 }}>
-          Log In
+    <div className="w-full max-w-sm mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-glass mb-2">🚀 Join NextGen</h2>
+          <p className="text-glass-muted text-sm">Create your account today</p>
+        </div>
+
+        <UiTextField label="Name" name="name" value={form.name} onChange={handleChange} required placeholder="Enter your full name" />
+
+        <UiTextField label="Username" name="username" value={form.username} onChange={handleChange} required placeholder="Choose a username" />
+
+        <UiTextField label="Email" name="email" type="email" value={form.email} onChange={handleChange} required placeholder="Enter your email" />
+
+        <UiTextField label="Password" name="password" type="password" value={form.password} onChange={handleChange} required placeholder="Create a password" />
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-glass-muted">Role</label>
+          <select
+            name="role"
+            value={form.role}
+            onChange={handleChange}
+            className="w-full input-glass px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-colors text-glass"
+            required
+          >
+            <option value="customer" className="bg-gray-800 text-white">
+              Customer
+            </option>
+            <option value="admin" className="bg-gray-800 text-white">
+              Admin
+            </option>
+          </select>
+        </div>
+
+        {error && (
+          <div className="glass-subtle p-3 rounded-lg border border-red-300/30">
+            <div className="text-red-200 text-sm text-center">{error}</div>
+          </div>
+        )}
+
+        {success && (
+          <div className="glass-subtle p-3 rounded-lg border border-green-300/30">
+            <div className="text-green-200 text-sm text-center">{success}</div>
+          </div>
+        )}
+
+        <UiButton type="submit" variant="contained" color="primary" fullWidth disabled={loading} size="large">
+          {loading ? "Creating account..." : "Create Account"}
         </UiButton>
-      </div>
-    </form>
+
+        <div className="text-center text-sm">
+          <span className="text-glass-muted">Already have an account? </span>
+          <button type="button" onClick={switchToLogin} className="text-glass hover:text-blue-200 font-semibold transition-colors">
+            Sign In
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

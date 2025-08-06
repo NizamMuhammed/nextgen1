@@ -195,23 +195,18 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin }) {
 
   return (
     <div className="space-y-8">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Welcome to NextGen Electronics</h1>
-        <p className="text-gray-600 text-lg">Discover the latest in technology and innovation</p>
-      </div>
-
       {/* Search and Filter */}
       <UiSearchFilter onSearch={handleSearch} onFilter={handleFilter} categories={categories} brands={brands} />
 
       {/* Results Summary */}
       {products.length > 0 && (
-        <div className="flex items-center justify-between">
-          <p className="text-gray-600">
-            Showing {products.length} of {pagination.totalProducts} products
+        <div className="flex items-center justify-between glass-subtle p-4 rounded-xl border border-white/20">
+          <p className="text-glass font-medium tracking-tight">
+            Showing <span className="font-semibold text-glass">{products.length}</span> of <span className="font-semibold text-glass">{pagination.totalProducts}</span> products
           </p>
           {pagination.totalPages > 1 && (
-            <p className="text-gray-600">
-              Page {pagination.currentPage} of {pagination.totalPages}
+            <p className="text-glass-muted font-medium tracking-tight">
+              Page <span className="font-semibold text-glass">{pagination.currentPage}</span> of <span className="font-semibold text-glass">{pagination.totalPages}</span>
             </p>
           )}
         </div>
@@ -236,18 +231,25 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin }) {
               </div>
 
               <div className="p-4">
-                <h2 className="font-semibold text-lg mb-2 cursor-pointer hover:text-blue-600 transition-colors" onClick={() => openProductModal(product)}>
+                <h2
+                  className="font-display font-semibold text-lg mb-3 cursor-pointer hover:text-blue-200 transition-colors text-glass tracking-tight leading-tight"
+                  onClick={() => openProductModal(product)}
+                >
                   {product.name}
                 </h2>
-                <div className="text-sm text-gray-500 mb-3">
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs mr-2">{product.brand}</span>
-                  <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">{product.category}</span>
+                <div className="text-sm mb-4 flex flex-wrap gap-2">
+                  <span className="bg-blue-400/30 text-blue-100 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-blue-300/30">{product.brand}</span>
+                  <span className="bg-purple-400/30 text-purple-100 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-purple-300/30">{product.category}</span>
                 </div>
-                <p className="mb-4 text-gray-600 text-sm line-clamp-2 leading-relaxed">{product.description}</p>
+                <p className="mb-4 text-glass-muted text-sm line-clamp-2 leading-relaxed tracking-tight">{product.description}</p>
 
                 <div className="flex items-center justify-between mb-4">
-                  <span className="font-bold text-xl text-blue-700">${product.price}</span>
-                  <span className={`text-sm px-2 py-1 rounded-full ${(product.stock || 0) > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                  <span className="font-display font-bold text-xl text-glass tracking-tight">${product.price}</span>
+                  <span
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm border ${
+                      (product.stock || 0) > 0 ? "bg-green-400/30 text-green-100 border-green-300/30" : "bg-red-400/30 text-red-100 border-red-300/30"
+                    }`}
+                  >
                     {(product.stock || 0) > 0 ? `In Stock (${product.stock})` : "Out of Stock"}
                   </span>
                 </div>
@@ -309,10 +311,10 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin }) {
 
       {/* No Results */}
       {products.length === 0 && !loading && (
-        <div className="text-center py-16">
-          <div className="text-gray-400 text-6xl mb-4">🔍</div>
-          <h3 className="text-2xl font-semibold mb-2 text-gray-700">No products found</h3>
-          <p className="text-gray-600">Try adjusting your search or filter criteria.</p>
+        <div className="text-center py-16 glass p-8 rounded-xl max-w-md mx-auto">
+          <div className="text-6xl mb-6">🔍</div>
+          <h3 className="heading-glass text-3xl font-bold mb-4 tracking-tight">No products found</h3>
+          <p className="text-glass-muted text-lg leading-relaxed">Try adjusting your search or filter criteria to discover more products.</p>
         </div>
       )}
 

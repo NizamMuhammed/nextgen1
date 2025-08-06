@@ -10,6 +10,7 @@ import UiOrderTracking from "./components/ui/UiOrderTracking";
 import UiDialog from "./components/ui/UiDialog";
 import UiButton from "./components/ui/UiButton";
 import UiFooter from "./components/ui/UiFooter";
+import UiNavBar from "./components/ui/UiNavBar";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -48,54 +49,26 @@ function App() {
     setShowSignup(false);
   };
 
-  // Navigation bar
-  const NavBar = () => (
-    <nav className="w-full flex justify-between items-center bg-white shadow-md p-4 sticky top-0 z-50">
-      <div className="font-bold text-xl cursor-pointer text-blue-600" onClick={() => setView("home")}>
-        NextGen Electronics
-      </div>
-      <div className="flex gap-3 items-center flex-wrap">
-        <UiButton className="relative" onClick={() => setView("cart")}>
-          Cart
-          {cart.length > 0 && <span className="ml-1 bg-red-500 text-white rounded-full px-2 text-xs">{cart.reduce((sum, i) => sum + i.quantity, 0)}</span>}
-        </UiButton>
-        {user && <UiButton onClick={() => setView("wishlist")}>Wishlist</UiButton>}
-        <UiButton onClick={() => setView("tracking")}>Track Order</UiButton>
-        {user && user.role === "admin" && (
-          <>
-            <UiButton onClick={() => setView("manageProducts")}>Manage Products</UiButton>
-            <UiButton onClick={() => setView("manageUsers")}>Manage Users</UiButton>
-          </>
-        )}
-        {user ? (
-          <>
-            <span className="text-gray-700 text-sm">Hi, {user.name || user.email}</span>
-            <UiButton
-              onClick={() => {
-                setUser(null);
-                setToken("");
-                localStorage.removeItem("token");
-                setCart([]);
-                setView("home");
-              }}
-            >
-              Logout
-            </UiButton>
-          </>
-        ) : (
-          <>
-            <UiButton onClick={() => setShowLogin(true)}>Login</UiButton>
-            <UiButton onClick={() => setShowSignup(true)}>Sign Up</UiButton>
-          </>
-        )}
-      </div>
-    </nav>
-  );
+  // Logout handler
+  const handleLogout = () => {
+    setUser(null);
+    setToken("");
+    localStorage.removeItem("token");
+    setCart([]);
+    setView("home");
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <NavBar />
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6">
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute top-10 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-1/2 right-20 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }}></div>
+        <div className="absolute bottom-20 left-1/3 w-64 h-64 bg-pink-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "4s" }}></div>
+      </div>
+
+      <UiNavBar user={user} cart={cart} onViewChange={setView} onShowLogin={() => setShowLogin(true)} onShowSignup={() => setShowSignup(true)} onLogout={handleLogout} />
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6 relative z-10">
         {view === "home" && <Home onAddToCart={handleAddToCart} isLoggedIn={!!user} promptLogin={promptLogin} />}
         {view === "cart" && <Cart cart={cart} onRemove={handleRemoveFromCart} onCheckout={handleCheckout} isLoggedIn={!!user} promptLogin={promptLogin} />}
         {view === "wishlist" && user && <UiWishlist isLoggedIn={!!user} promptLogin={promptLogin} />}
@@ -103,7 +76,13 @@ function App() {
         {view === "manageProducts" && user && user.role === "admin" && <ManageProducts token={token} />}
         {view === "manageUsers" && user && user.role === "admin" && <ManageUsers token={token} />}
         {/* If not admin, don't show admin pages */}
-        {(view === "manageProducts" || view === "manageUsers") && (!user || user.role !== "admin") && <div className="p-6 text-red-500">Access denied. Admins only.</div>}
+        {(view === "manageProducts" || view === "manageUsers") && (!user || user.role !== "admin") && (
+          <div className="glass p-8 rounded-xl text-center max-w-md mx-auto mt-16">
+            <div className="text-6xl mb-6">🔒</div>
+            <h2 className="heading-glass text-3xl font-bold mb-4 tracking-tight">Access Denied</h2>
+            <p className="text-glass-muted text-lg leading-relaxed">This page is restricted to administrators only.</p>
+          </div>
+        )}
       </main>
 
       <UiDialog open={showLogin} onClose={() => setShowLogin(false)} title="Log In">

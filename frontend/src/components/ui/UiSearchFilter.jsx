@@ -52,27 +52,27 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+    <div className="glass p-6 rounded-xl shadow-lg">
       <div className="flex items-center mb-6">
-        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-8 h-8 glass-subtle rounded-lg flex items-center justify-center mr-3">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
-        <h3 className="text-xl font-semibold text-gray-900">Search & Filter Products</h3>
+        <h3 className="heading-glass text-xl font-semibold tracking-tight">Search & Filter Products</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {/* Search */}
         <div className="lg:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Search Products</label>
+          <label className="block text-sm font-medium text-glass-muted mb-2">Search Products</label>
           <div className="flex">
             <input
               type="text"
               placeholder="Search by name, description, or brand..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              className="flex-1 input-glass px-4 py-3 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-colors placeholder:text-white/50 text-glass"
             />
             <UiButton onClick={handleSearch} variant="contained" color="primary" className="rounded-l-none px-6" disabled={isFiltering}>
               Search
@@ -82,15 +82,15 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
 
         {/* Category Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+          <label className="block text-sm font-medium text-glass-muted mb-2">Category</label>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            className="w-full input-glass px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-colors text-glass"
           >
             <option value="">All Categories</option>
             {categories?.map((category) => (
-              <option key={category} value={category}>
+              <option key={category} value={category} className="bg-gray-800 text-white">
                 {category}
               </option>
             ))}
@@ -99,15 +99,15 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
 
         {/* Brand Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+          <label className="block text-sm font-medium text-glass-muted mb-2">Brand</label>
           <select
             value={selectedBrand}
             onChange={(e) => setSelectedBrand(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            className="w-full input-glass px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-colors text-glass"
           >
             <option value="">All Brands</option>
             {brands?.map((brand) => (
-              <option key={brand} value={brand}>
+              <option key={brand} value={brand} className="bg-gray-800 text-white">
                 {brand}
               </option>
             ))}
@@ -118,7 +118,7 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         {/* Price Range */}
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+          <label className="block text-sm font-medium text-glass-muted mb-2">Price Range</label>
           <div className="flex items-center space-x-3">
             <div className="flex-1">
               <input
@@ -126,17 +126,17 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
                 placeholder="Min Price"
                 value={priceRange.min}
                 onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full input-glass px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-colors placeholder:text-white/50 text-glass"
               />
             </div>
-            <span className="text-gray-500 font-medium">to</span>
+            <span className="text-glass-muted font-medium">to</span>
             <div className="flex-1">
               <input
                 type="number"
                 placeholder="Max Price"
                 value={priceRange.max}
                 onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full input-glass px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-colors placeholder:text-white/50 text-glass"
               />
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
 
         {/* Stock Range */}
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Stock Range</label>
+          <label className="block text-sm font-medium text-glass-muted mb-2">Stock Range</label>
           <div className="flex items-center space-x-3">
             <div className="flex-1">
               <input
@@ -152,17 +152,17 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
                 placeholder="Min Stock"
                 value={stockRange.min}
                 onChange={(e) => setStockRange({ ...stockRange, min: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full input-glass px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-colors placeholder:text-white/50 text-glass"
               />
             </div>
-            <span className="text-gray-500 font-medium">to</span>
+            <span className="text-glass-muted font-medium">to</span>
             <div className="flex-1">
               <input
                 type="number"
                 placeholder="Max Stock"
                 value={stockRange.max}
                 onChange={(e) => setStockRange({ ...stockRange, max: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full input-glass px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-colors placeholder:text-white/50 text-glass"
               />
             </div>
           </div>
@@ -172,34 +172,56 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Sort By */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+          <label className="block text-sm font-medium text-glass-muted mb-2">Sort By</label>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            className="w-full input-glass px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-colors text-glass"
           >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="name">Name A-Z</option>
-            <option value="name-desc">Name Z-A</option>
-            <option value="price">Price Low to High</option>
-            <option value="price-desc">Price High to Low</option>
-            <option value="stock">Stock Low to High</option>
-            <option value="stock-desc">Stock High to Low</option>
+            <option value="newest" className="bg-gray-800 text-white">
+              Newest First
+            </option>
+            <option value="oldest" className="bg-gray-800 text-white">
+              Oldest First
+            </option>
+            <option value="name" className="bg-gray-800 text-white">
+              Name A-Z
+            </option>
+            <option value="name-desc" className="bg-gray-800 text-white">
+              Name Z-A
+            </option>
+            <option value="price" className="bg-gray-800 text-white">
+              Price Low to High
+            </option>
+            <option value="price-desc" className="bg-gray-800 text-white">
+              Price High to Low
+            </option>
+            <option value="stock" className="bg-gray-800 text-white">
+              Stock Low to High
+            </option>
+            <option value="stock-desc" className="bg-gray-800 text-white">
+              Stock High to Low
+            </option>
           </select>
         </div>
 
         {/* Stock Availability */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Stock Availability</label>
+          <label className="block text-sm font-medium text-glass-muted mb-2">Stock Availability</label>
           <select
             value={inStock}
             onChange={(e) => setInStock(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            className="w-full input-glass px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-colors text-glass"
           >
-            <option value="">All Products</option>
-            <option value="true">In Stock Only</option>
-            <option value="false">Out of Stock Only</option>
+            <option value="" className="bg-gray-800 text-white">
+              All Products
+            </option>
+            <option value="true" className="bg-gray-800 text-white">
+              In Stock Only
+            </option>
+            <option value="false" className="bg-gray-800 text-white">
+              Out of Stock Only
+            </option>
           </select>
         </div>
 
@@ -225,22 +247,26 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
 
       {/* Active Filters Display */}
       {(selectedCategory || selectedBrand || priceRange.min || priceRange.max || stockRange.min || stockRange.max || inStock) && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h4 className="text-sm font-medium text-blue-800 mb-2">Active Filters:</h4>
+        <div className="glass-subtle rounded-lg p-4 mb-6 border border-white/20">
+          <h4 className="text-sm font-medium text-glass mb-2">Active Filters:</h4>
           <div className="flex flex-wrap gap-2">
-            {selectedCategory && <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Category: {selectedCategory}</span>}
-            {selectedBrand && <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Brand: {selectedBrand}</span>}
+            {selectedCategory && <span className="bg-blue-400/30 text-blue-100 px-3 py-1 rounded-full text-xs backdrop-blur-sm border border-blue-300/30">Category: {selectedCategory}</span>}
+            {selectedBrand && <span className="bg-blue-400/30 text-blue-100 px-3 py-1 rounded-full text-xs backdrop-blur-sm border border-blue-300/30">Brand: {selectedBrand}</span>}
             {(priceRange.min || priceRange.max) && (
-              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+              <span className="bg-blue-400/30 text-blue-100 px-3 py-1 rounded-full text-xs backdrop-blur-sm border border-blue-300/30">
                 Price: ${priceRange.min || "0"} - ${priceRange.max || "∞"}
               </span>
             )}
             {(stockRange.min || stockRange.max) && (
-              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+              <span className="bg-blue-400/30 text-blue-100 px-3 py-1 rounded-full text-xs backdrop-blur-sm border border-blue-300/30">
                 Stock: {stockRange.min || "0"} - {stockRange.max || "∞"}
               </span>
             )}
-            {inStock && <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">{inStock === "true" ? "In Stock Only" : "Out of Stock Only"}</span>}
+            {inStock && (
+              <span className="bg-blue-400/30 text-blue-100 px-3 py-1 rounded-full text-xs backdrop-blur-sm border border-blue-300/30">
+                {inStock === "true" ? "In Stock Only" : "Out of Stock Only"}
+              </span>
+            )}
           </div>
         </div>
       )}

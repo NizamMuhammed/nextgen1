@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
+import UiTextField from "./components/ui/UiTextField";
+import UiButton from "./components/ui/UiButton";
 
 export default function LoginForm({ onLogin, switchToSignup }) {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -32,20 +32,34 @@ export default function LoginForm({ onLogin, switchToSignup }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow w-full max-w-sm space-y-6 flex flex-col">
-      <h2 className="text-2xl font-bold text-center mb-2">Log In</h2>
-      <TextField label="Email" name="email" type="email" value={form.email} onChange={handleChange} required fullWidth variant="outlined" size="small" />
-      <TextField label="Password" name="password" type="password" value={form.password} onChange={handleChange} required fullWidth variant="outlined" size="small" />
-      {error && <div className="text-red-500 text-sm text-center">{error}</div>}
-      <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading} sx={{ py: 1.5, fontWeight: 600 }}>
-        {loading ? "Logging in..." : "Log In"}
-      </Button>
-      <div className="text-center text-sm mt-2">
-        Don't have an account?{" "}
-        <Button variant="text" color="primary" size="small" onClick={switchToSignup} sx={{ textTransform: "none", fontWeight: 600 }}>
-          Sign Up
-        </Button>
-      </div>
-    </form>
+    <div className="w-full max-w-sm mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-glass mb-2">🔐 Welcome Back</h2>
+          <p className="text-glass-muted text-sm">Sign in to your account</p>
+        </div>
+
+        <UiTextField label="Email" name="email" type="email" value={form.email} onChange={handleChange} required placeholder="Enter your email" />
+
+        <UiTextField label="Password" name="password" type="password" value={form.password} onChange={handleChange} required placeholder="Enter your password" />
+
+        {error && (
+          <div className="glass-subtle p-3 rounded-lg border border-red-300/30">
+            <div className="text-red-200 text-sm text-center">{error}</div>
+          </div>
+        )}
+
+        <UiButton type="submit" variant="contained" color="primary" fullWidth disabled={loading} size="large">
+          {loading ? "Signing in..." : "Sign In"}
+        </UiButton>
+
+        <div className="text-center text-sm">
+          <span className="text-glass-muted">Don't have an account? </span>
+          <button type="button" onClick={switchToSignup} className="text-glass hover:text-blue-200 font-semibold transition-colors">
+            Sign Up
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
