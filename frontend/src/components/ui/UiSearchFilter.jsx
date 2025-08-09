@@ -254,7 +254,7 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
             {selectedBrand && <span className="bg-blue-400/30 text-blue-100 px-3 py-1 rounded-full text-xs backdrop-blur-sm border border-blue-300/30">Brand: {selectedBrand}</span>}
             {(priceRange.min || priceRange.max) && (
               <span className="bg-blue-400/30 text-blue-100 px-3 py-1 rounded-full text-xs backdrop-blur-sm border border-blue-300/30">
-                Price: ${priceRange.min || "0"} - ${priceRange.max || "∞"}
+                Price: Rs.{priceRange.min || "0"} - Rs.{priceRange.max || "∞"}
               </span>
             )}
             {(stockRange.min || stockRange.max) && (

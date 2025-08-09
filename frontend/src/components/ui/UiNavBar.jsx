@@ -27,6 +27,13 @@ export default function UiNavBar({ user, cart, onViewChange, onShowLogin, onShow
           )}
         </UiButton>
 
+        {/* Orders */}
+        {user && (
+          <UiButton className="font-medium tracking-tight" onClick={() => onViewChange("orders")}>
+            📄 My Orders
+          </UiButton>
+        )}
+
         {/* Wishlist Button - Only for logged in users */}
         {user && (
           <UiButton className="font-medium tracking-tight" onClick={() => onViewChange("wishlist")}>

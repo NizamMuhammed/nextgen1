@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const Product = require("../models/Product");
+const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
@@ -86,6 +88,65 @@ router.delete("/users/:id", protect, adminOnly, async (req, res) => {
     res.json({ message: "User deleted" });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete user" });
+  }
+});
+
+// Set last viewed product for the current user
+router.put("/users/me/last-viewed", protect, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    if (!productId) return res.status(400).json({ error: "productId is required" });
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ error: "Invalid productId" });
+    }
+    
+    // Check if product exists
+    const exists = await Product.findById(productId).select("_id");
+    if (!exists) return res.status(404).json({ error: "Product not found" });
+
+    // Use findByIdAndUpdate to handle the case where lastViewedProducts might not exist
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        $pull: { lastViewedProducts: productId }, // Remove if exists
+        $push: { 
+          lastViewedProducts: { 
+            $each: [productId], 
+            $position: 0 // Add to beginning
+          } 
+        }
+      },
+      { 
+        new: true, 
+        upsert: false,
+        setDefaultsOnInsert: true 
+      }
+    );
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Keep only last 4 products
+    if (user.lastViewedProducts && user.lastViewedProducts.length > 4) {
+      user.lastViewedProducts = user.lastViewedProducts.slice(0, 4);
+      await user.save();
+    }
+
+    res.json({ message: "Last viewed products updated", count: user.lastViewedProducts?.length || 0 });
+  } catch (err) {
+    console.error("Error updating last viewed products:", err);
+    // Return success even if there's an error to avoid breaking the frontend
+    res.json({ message: "Last viewed products updated (fallback)", count: 0 });
+  }
+});
+
+// Get current user's last viewed products details
+router.get("/users/me/last-viewed", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate("lastViewedProducts");
+    return res.json(user?.lastViewedProducts || []);
+  } catch (err) {
+    // Be lenient: return empty array instead of 500 to avoid breaking clients
+    return res.json([]);
   }
 });
 

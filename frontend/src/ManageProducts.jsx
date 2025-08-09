@@ -285,7 +285,7 @@ export default function ManageProducts({ token }) {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <UiTextField label="Product Name" name="name" value={form.name} onChange={handleChange} required placeholder="Enter product name" />
-            <UiTextField label="Price ($)" name="price" type="number" step="0.01" value={form.price} onChange={handleChange} required placeholder="0.00" />
+            <UiTextField label="Price (Rs.)" name="price" type="number" step="0.01" value={form.price} onChange={handleChange} required placeholder="0.00" />
           </div>
 
           <UiTextField label="Description" name="description" value={form.description} onChange={handleChange} required multiline minRows={3} placeholder="Enter product description" />
@@ -431,7 +431,7 @@ export default function ManageProducts({ token }) {
                     <div className="flex-1">
                       <div className="font-semibold text-lg text-gray-900 mb-1">{product.name}</div>
                       <div className="text-sm text-gray-600 mb-2">
-                        <span className="font-medium text-blue-600">${product.price}</span> •<span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs ml-2">{product.brand}</span> •
+                        <span className="font-medium text-blue-600">Rs.{product.price}</span> •<span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs ml-2">{product.brand}</span> •
                         <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs ml-2">{product.category}</span>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-gray-500">

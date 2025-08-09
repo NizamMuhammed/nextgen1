@@ -56,13 +56,13 @@ export default function Cart({ cart, onRemove, onCheckout, isLoggedIn, promptLog
                         </div>
                         <div className="flex items-center gap-4 text-sm">
                           <span className="bg-green-400/30 text-green-100 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-green-300/30">Qty: {item.quantity}</span>
-                          <span className="font-semibold text-glass mono-glass">${item.price} each</span>
+                          <span className="font-semibold text-glass mono-glass">Rs.{item.price} each</span>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-4 ml-4">
                       <div className="text-right">
-                        <div className="font-display font-bold text-xl text-glass tracking-tight">${(item.price * item.quantity).toFixed(2)}</div>
+                        <div className="font-display font-bold text-xl text-glass tracking-tight">Rs.{(item.price * item.quantity).toFixed(2)}</div>
                         <div className="text-xs text-glass-muted font-medium">Total</div>
                       </div>
                       <UiButton variant="outlined" color="error" size="small" onClick={() => onRemove(item._id)}>
@@ -89,7 +89,7 @@ export default function Cart({ cart, onRemove, onCheckout, isLoggedIn, promptLog
             <div className="space-y-4">
               <div className="flex justify-between items-center py-3 border-b border-white/20">
                 <span className="text-glass-muted font-medium tracking-tight">Subtotal ({cart.length} items)</span>
-                <span className="font-semibold text-glass mono-glass">${total.toFixed(2)}</span>
+                <span className="font-semibold text-glass mono-glass">Rs.{total.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center py-3 border-b border-white/20">
                 <span className="text-glass-muted font-medium tracking-tight">Shipping</span>
@@ -97,7 +97,7 @@ export default function Cart({ cart, onRemove, onCheckout, isLoggedIn, promptLog
               </div>
               <div className="flex justify-between items-center py-3">
                 <span className="heading-glass text-lg font-semibold tracking-tight">Total</span>
-                <span className="font-display text-2xl font-bold text-glass tracking-tight">${total.toFixed(2)}</span>
+                <span className="font-display text-2xl font-bold text-glass tracking-tight">Rs.{total.toFixed(2)}</span>
               </div>
             </div>
 

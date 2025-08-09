@@ -299,7 +299,7 @@ export default function ManageProducts({ token }) {
                       <div>
                         <div className="font-semibold">{product.name}</div>
                         <div className="text-sm text-gray-600">
-                          ${product.price} • {product.category} • Stock: {product.stock || 0}
+                          Rs.{product.price} • {product.category} • Stock: {product.stock || 0}
                         </div>
                         {product.description && (
                           <div className="text-xs text-gray-500 mt-1">{product.description.length > 100 ? `${product.description.substring(0, 100)}...` : product.description}</div>

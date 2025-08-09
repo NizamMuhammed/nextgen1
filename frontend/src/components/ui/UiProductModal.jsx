@@ -31,10 +31,27 @@ export default function UiProductModal({ product, open, onClose, onAddToCart, is
           <div className="space-y-4">
             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
               {product.images && product.images.length > 0 ? (
-                <img src={`http://localhost:5000${product.images[selectedImage]}`} alt={product.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">No Image Available</div>
-              )}
+                <img
+                  src={product.images[selectedImage].startsWith("http") ? product.images[selectedImage] : `http://localhost:5000${product.images[selectedImage]}`}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    e.target.nextSibling.style.display = "flex";
+                  }}
+                  onLoad={(e) => {
+                    e.target.nextSibling.style.display = "none";
+                  }}
+                />
+              ) : null}
+              <div className="w-full h-full flex items-center justify-center text-gray-400" style={{ display: product.images && product.images.length > 0 ? "flex" : "flex" }}>
+                <div className="text-center">
+                  <svg className="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                  </svg>
+                  <p className="text-xs text-gray-500">No Image Available</p>
+                </div>
+              </div>
             </div>
 
             {/* Image Thumbnails */}
@@ -46,7 +63,21 @@ export default function UiProductModal({ product, open, onClose, onAddToCart, is
                     onClick={() => setSelectedImage(index)}
                     className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 ${selectedImage === index ? "border-blue-500" : "border-gray-200"}`}
                   >
-                    <img src={`http://localhost:5000${image}`} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                    <img
+                      src={image.startsWith("http") ? image : `http://localhost:5000${image}`}
+                      alt={`${product.name} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.nextSibling.style.display = "flex";
+                      }}
+                      onLoad={(e) => {
+                        e.target.nextSibling.style.display = "none";
+                      }}
+                    />
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs" style={{ display: "flex" }}>
+                      Error
+                    </div>
                   </button>
                 ))}
               </div>
@@ -61,7 +92,7 @@ export default function UiProductModal({ product, open, onClose, onAddToCart, is
                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{product.brand}</span>
                 <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full">{product.category}</span>
               </div>
-              <div className="text-3xl font-bold text-blue-600 mb-4">${product.price}</div>
+              <div className="text-2xl font-bold text-blue-600 mb-4">Rs.{product.price}</div>
             </div>
 
             {/* Description */}
@@ -84,7 +115,7 @@ export default function UiProductModal({ product, open, onClose, onAddToCart, is
                 </div>
                 <div>
                   <span className="text-gray-500">Stock:</span>
-                  <span className={`ml-2 font-medium ${(product.stock || 0) > 0 ? "text-green-600" : "text-red-600"}`}>{product.stock || 0} units</span>
+                  <span className={`ml-2 font-normal ${(product.stock || 0) > 0 ? "text-green-600" : "text-red-600"}`}>{product.stock || 0} units</span>
                 </div>
                 <div>
                   <span className="text-gray-500">SKU:</span>

@@ -7,6 +7,9 @@ import ManageProducts from "./ManageProducts";
 import ManageUsers from "./ManageUsers";
 import UiWishlist from "./components/ui/UiWishlist";
 import UiOrderTracking from "./components/ui/UiOrderTracking";
+import Checkout from "./Checkout";
+import Orders from "./Orders";
+import ProductDetails from "./ProductDetails";
 import UiDialog from "./components/ui/UiDialog";
 import UiButton from "./components/ui/UiButton";
 import UiFooter from "./components/ui/UiFooter";
@@ -19,6 +22,7 @@ function App() {
   const [view, setView] = useState("home"); // 'home' | 'cart' | 'manageProducts' | 'manageUsers' | 'wishlist'
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
 
   // Add to cart handler
   const handleAddToCart = (product) => {
@@ -37,10 +41,9 @@ function App() {
     setCart((prev) => prev.filter((item) => item._id !== id));
   };
 
-  // Checkout handler (dummy)
+  // Checkout handler now routes to checkout view
   const handleCheckout = () => {
-    alert("Checkout successful! (not implemented)");
-    setCart([]);
+    setView("checkout");
   };
 
   // Prompt login/signup if not logged in
@@ -69,8 +72,33 @@ function App() {
 
       <UiNavBar user={user} cart={cart} onViewChange={setView} onShowLogin={() => setShowLogin(true)} onShowSignup={() => setShowSignup(true)} onLogout={handleLogout} />
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6 relative z-10">
-        {view === "home" && <Home onAddToCart={handleAddToCart} isLoggedIn={!!user} promptLogin={promptLogin} />}
+        {view === "home" && (
+          <Home
+            onAddToCart={handleAddToCart}
+            isLoggedIn={!!user}
+            promptLogin={promptLogin}
+            token={token}
+            onOpenProduct={(product) => {
+              setSelectedProductId(product._id);
+              setView("product");
+            }}
+          />
+        )}
+        {view === "product" && (
+          <ProductDetails productId={selectedProductId} onBack={() => setView("home")} onAddToCart={handleAddToCart} isLoggedIn={!!user} promptLogin={promptLogin} token={token} />
+        )}
         {view === "cart" && <Cart cart={cart} onRemove={handleRemoveFromCart} onCheckout={handleCheckout} isLoggedIn={!!user} promptLogin={promptLogin} />}
+        {view === "checkout" && (
+          <Checkout
+            cart={cart}
+            token={token}
+            onOrderSuccess={() => {
+              setCart([]);
+              setView("orders");
+            }}
+          />
+        )}
+        {view === "orders" && <Orders token={token} />}
         {view === "wishlist" && user && <UiWishlist isLoggedIn={!!user} promptLogin={promptLogin} />}
         {view === "tracking" && <UiOrderTracking />}
         {view === "manageProducts" && user && user.role === "admin" && <ManageProducts token={token} />}

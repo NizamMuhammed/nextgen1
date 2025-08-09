@@ -5,6 +5,8 @@ const cors = require("cors");
 const productsRouter = require("./routes/products");
 const authRouter = require("./routes/auth");
 const usersRouter = require("./routes/users");
+const ordersRouter = require("./routes/orders");
+const reviewsRouter = require("./routes/reviews");
 const Product = require("./models/Product");
 const path = require("path");
 
@@ -57,6 +59,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api", productsRouter);
 app.use("/api/auth", authRouter);
 app.use("/api", usersRouter);
+app.use("/api", ordersRouter);
+app.use("/api", reviewsRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
