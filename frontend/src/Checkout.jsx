@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import UiCard from "./components/ui/UiCard";
 import UiTextField from "./components/ui/UiTextField";
 import UiButton from "./components/ui/UiButton";
@@ -16,6 +17,7 @@ export default function Checkout({ cart, token, onOrderSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const navigate = useNavigate();
 
   const totals = useMemo(() => {
     const itemsPrice = cart.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0);
@@ -68,7 +70,11 @@ export default function Checkout({ cart, token, onOrderSuccess }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to create order");
       setSuccess("Order placed successfully!");
-      onOrderSuccess && onOrderSuccess(data);
+
+      // Navigate to orders page after successful order
+      setTimeout(() => {
+        navigate("/orders");
+      }, 2000);
     } catch (err) {
       setError(err.message);
     } finally {

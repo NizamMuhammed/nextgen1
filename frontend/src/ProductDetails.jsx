@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import UiCard from "./components/ui/UiCard";
 import UiButton from "./components/ui/UiButton";
 
-export default function ProductDetails({ productId, onBack, onAddToCart, isLoggedIn, promptLogin, token }) {
+export default function ProductDetails({ onAddToCart, isLoggedIn, promptLogin, token }) {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const { productId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -73,6 +76,10 @@ export default function ProductDetails({ productId, onBack, onAddToCart, isLogge
     }
   };
 
+  const handleBack = () => {
+    navigate(-1); // Go back to previous page
+  };
+
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-[300px]">
@@ -89,11 +96,9 @@ export default function ProductDetails({ productId, onBack, onAddToCart, isLogge
         <div className="text-6xl mb-6">⚠️</div>
         <h2 className="heading-glass text-2xl font-bold mb-3">Product not found</h2>
         <p className="text-glass-muted mb-4">{error || "We couldn't find the product you're looking for."}</p>
-        {onBack && (
-          <UiButton variant="outlined" color="secondary" onClick={onBack}>
-            Go Back
-          </UiButton>
-        )}
+        <UiButton variant="outlined" color="secondary" onClick={handleBack}>
+          Go Back
+        </UiButton>
       </div>
     );
 
@@ -101,11 +106,9 @@ export default function ProductDetails({ productId, onBack, onAddToCart, isLogge
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="heading-glass text-3xl font-bold tracking-tight">{product.name}</h1>
-        {onBack && (
-          <UiButton variant="outlined" color="secondary" onClick={onBack}>
-            ← Back
-          </UiButton>
-        )}
+        <UiButton variant="outlined" color="secondary" onClick={handleBack}>
+          ← Back
+        </UiButton>
       </div>
 
       <UiCard variant="strong">

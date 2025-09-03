@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import UiButton from "./UiButton";
 
 export default function UiSearchFilter({ onSearch, onFilter, categories, brands }) {
@@ -11,19 +11,46 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
   const [inStock, setInStock] = useState("");
   const [isFiltering, setIsFiltering] = useState(false);
 
-  // Debounced search effect
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchTerm !== "") {
-        onSearch(searchTerm);
-      }
-    }, 500);
+  // Track previous search term to detect actual changes
+  const prevSearchTermRef = useRef("");
+  const searchTimeoutRef = useRef(null);
 
-    return () => clearTimeout(timer);
-  }, [searchTerm, onSearch]);
+  // Handle search input changes with debouncing
+  const handleSearchInputChange = (e) => {
+    const newValue = e.target.value;
+    setSearchTerm(newValue);
+
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Only search if the value actually changed
+    if (newValue !== prevSearchTermRef.current) {
+      // Set a short delay to avoid excessive API calls
+      searchTimeoutRef.current = setTimeout(() => {
+        onSearch(newValue);
+        prevSearchTermRef.current = newValue;
+      }, 300);
+    }
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSearch = () => {
+    // Clear any pending timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
     onSearch(searchTerm);
+    prevSearchTermRef.current = searchTerm;
   };
 
   const handleFilter = () => {
@@ -40,6 +67,10 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
   };
 
   const handleReset = () => {
+    // Clear any pending timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
     setSearchTerm("");
     setSelectedCategory("");
     setSelectedBrand("");
@@ -47,6 +78,7 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
     setStockRange({ min: "", max: "" });
     setSortBy("newest");
     setInStock("");
+    prevSearchTermRef.current = "";
     onSearch("");
     onFilter({});
   };
@@ -71,7 +103,7 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
               type="text"
               placeholder="Search by name, description, or brand..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchInputChange}
               className="flex-1 input-glass px-4 py-3 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-colors placeholder:text-white/50 text-glass"
             />
             <UiButton onClick={handleSearch} variant="contained" color="primary" className="rounded-l-none px-6" disabled={isFiltering}>

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import UiCard from "./components/ui/UiCard";
 import UiButton from "./components/ui/UiButton";
 import UiSearchFilter from "./components/ui/UiSearchFilter";
 import UiProductModal from "./components/ui/UiProductModal";
 
-export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProduct, token }) {
+export default function Home({ onAddToCart, isLoggedIn, promptLogin, token }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,6 +14,7 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
   const [lastViewedProducts, setLastViewedProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   // Utility function to randomize array using Fisher-Yates shuffle
   const shuffleArray = (array) => {
@@ -99,7 +101,9 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
       try {
         const res = await fetch("http://localhost:5000/api/products/categories");
         const data = await res.json();
-        setCategories(data);
+        if (res.ok) {
+          setCategories(data);
+        }
       } catch (err) {
         console.error("Failed to fetch categories:", err);
       }
@@ -109,93 +113,72 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
       try {
         const res = await fetch("http://localhost:5000/api/products/brands");
         const data = await res.json();
-        setBrands(data);
+        if (res.ok) {
+          setBrands(data);
+        }
       } catch (err) {
         console.error("Failed to fetch brands:", err);
       }
     };
 
-    fetchProducts();
     fetchCategories();
     fetchBrands();
-    // Fetch last viewed products (server if logged in, else local)
-    const fetchLastViewed = async () => {
-      try {
-        if (token) {
-          console.log("Fetching last viewed products from server...");
-          const res = await fetch("http://localhost:5000/api/users/me/last-viewed", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const data = await res.json();
-          console.log("Server response:", data);
-          if (res.ok && Array.isArray(data)) {
-            console.log("Setting last viewed products from server:", data.length);
-            return setLastViewedProducts(shuffleArray(data));
-          }
-        }
-
-        // Fallback to local storage for guests or if server returned empty array
-        console.log("Using local storage fallback...");
-        const localIds = JSON.parse(localStorage.getItem("lastViewedProductIds") || "[]");
-        console.log("Local IDs:", localIds);
-
-        if (localIds.length > 0) {
-          const products = [];
-          for (const id of localIds) {
-            try {
-              const pres = await fetch(`http://localhost:5000/api/products/${id}`);
-              const pdata = await pres.json();
-              if (pres.ok) products.push(pdata);
-            } catch (err) {
-              console.error("Failed to fetch product:", id, err);
-            }
-          }
-          console.log("Setting last viewed products from local storage:", products.length);
-          setLastViewedProducts(shuffleArray(products));
-        }
-      } catch (err) {
-        console.error("Error fetching last viewed products:", err);
-      }
-    };
-    fetchLastViewed();
+    fetchProducts();
   }, []);
 
-  const handleSearch = (searchTerm) => {
-    const newFilters = { ...filters, search: searchTerm };
-    setFilters(newFilters);
-    fetchProducts(newFilters, 1);
+  // Load last viewed products from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("lastViewedProducts");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setLastViewedProducts(parsed.slice(0, 4)); // Show only last 4 products
+      } catch (err) {
+        console.error("Failed to parse last viewed products:", err);
+      }
+    }
+  }, []);
+
+  const handleAddToCartAndTrack = (product) => {
+    // Add to cart
+    onAddToCart(product);
+
+    // Track last viewed product
+    const saved = localStorage.getItem("lastViewedProducts");
+    let lastViewed = [];
+    if (saved) {
+      try {
+        lastViewed = JSON.parse(saved);
+      } catch (err) {
+        console.error("Failed to parse last viewed products:", err);
+      }
+    }
+
+    // Remove if already exists and add to front
+    lastViewed = lastViewed.filter((p) => p._id !== product._id);
+    lastViewed.unshift(product);
+
+    // Keep only last 10 products
+    lastViewed = lastViewed.slice(0, 10);
+
+    localStorage.setItem("lastViewedProducts", JSON.stringify(lastViewed));
+    setLastViewedProducts(lastViewed.slice(0, 4));
   };
 
-  const handleFilter = (filterOptions) => {
-    const newFilters = {
-      ...filters,
-      category: filterOptions.category || "",
-      brand: filterOptions.brand || "",
-      minPrice: filterOptions.priceRange?.min || "",
-      maxPrice: filterOptions.priceRange?.max || "",
-      minStock: filterOptions.stockRange?.min || "",
-      maxStock: filterOptions.stockRange?.max || "",
-      inStock: filterOptions.inStock || "",
-      sortBy: filterOptions.sortBy || "createdAt",
-      sortOrder:
-        filterOptions.sortBy === "name"
-          ? "asc"
-          : filterOptions.sortBy === "name-desc"
-          ? "desc"
-          : filterOptions.sortBy === "price"
-          ? "asc"
-          : filterOptions.sortBy === "price-desc"
-          ? "desc"
-          : filterOptions.sortBy === "stock"
-          ? "asc"
-          : filterOptions.sortBy === "stock-desc"
-          ? "desc"
-          : filterOptions.sortBy === "newest"
-          ? "desc"
-          : filterOptions.sortBy === "oldest"
-          ? "asc"
-          : "desc",
-    };
+  const handleFilterChange = (filterOptions) => {
+    const newFilters = { ...filters };
+
+    // Map frontend filter names to backend names
+    if (filterOptions.search !== undefined) newFilters.search = filterOptions.search;
+    if (filterOptions.category !== undefined) newFilters.category = filterOptions.category;
+    if (filterOptions.brand !== undefined) newFilters.brand = filterOptions.brand;
+    if (filterOptions.minPrice !== undefined) newFilters.minPrice = filterOptions.minPrice;
+    if (filterOptions.maxPrice !== undefined) newFilters.maxPrice = filterOptions.maxPrice;
+    if (filterOptions.minStock !== undefined) newFilters.minStock = filterOptions.minStock;
+    if (filterOptions.maxStock !== undefined) newFilters.maxStock = filterOptions.maxStock;
+    if (filterOptions.inStock !== undefined) newFilters.inStock = filterOptions.inStock;
+    if (filterOptions.sortBy !== undefined) newFilters.sortBy = filterOptions.sortBy;
+    if (filterOptions.sortOrder !== undefined) newFilters.sortOrder = filterOptions.sortOrder;
 
     // Convert sortBy to backend format
     if (filterOptions.sortBy === "name" || filterOptions.sortBy === "name-desc") {
@@ -224,6 +207,10 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
   const closeProductModal = () => {
     setShowModal(false);
     setSelectedProduct(null);
+  };
+
+  const handleProductClick = (product) => {
+    navigate(`/product/${product._id}`);
   };
 
   if (loading)
@@ -274,7 +261,7 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
               <UiCard key={product._id} className="flex flex-col h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex-1">
                   {/* Product Image (go to details page) */}
-                  <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden cursor-pointer group relative" onClick={() => onOpenProduct && onOpenProduct(product)}>
+                  <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden cursor-pointer group relative" onClick={() => handleProductClick(product)}>
                     {product.images && product.images.length > 0 ? (
                       <img
                         src={product.images[0].startsWith("http") ? product.images[0] : `http://localhost:5000${product.images[0]}`}
@@ -318,7 +305,7 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
                   <div className="p-4">
                     <h2
                       className="font-display font-semibold text-lg mb-3 cursor-pointer hover:text-blue-200 transition-colors text-glass tracking-tight leading-tight"
-                      onClick={() => onOpenProduct && onOpenProduct(product)}
+                      onClick={() => handleProductClick(product)}
                     >
                       {product.name}
                     </h2>
@@ -350,7 +337,7 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
                       if (!isLoggedIn) {
                         promptLogin();
                       } else {
-                        onAddToCart(product);
+                        handleAddToCartAndTrack(product);
                       }
                     }}
                     disabled={(product.stock || 0) === 0}
@@ -380,7 +367,7 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products.map((product) => (
-          <UiCard key={product._id} className="flex flex-col h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" onClick={() => onOpenProduct && onOpenProduct(product)}>
+          <UiCard key={product._id} className="flex flex-col h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" onClick={() => handleProductClick(product)}>
             <div className="flex-1">
               {/* Product Image (go to details page) */}
               <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden cursor-pointer group relative">
@@ -400,7 +387,7 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
                     }}
                   />
                 ) : null}
-                <div className="w-full h-full flex items-center justify-center text-gray-400" style={{ display: product.images && product.images.length > 0 ? "flex" : "flex" }}>
+                <div className="w-full h-full flex items-center justify-center text-gray-400" style={{ display: product.images && product.images.length > 0 ? "none" : "flex" }}>
                   <div className="text-center">
                     <svg className="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
@@ -410,7 +397,7 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
                 </div>
 
                 {/* Quick View Overlay Button */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-blue-600/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <UiButton
                     variant="contained"
                     color="secondary"
@@ -419,7 +406,7 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
                       e.stopPropagation(); // Prevent triggering the image click
                       openProductModal(product);
                     }}
-                    className="w-full bg-white/90 text-black hover:bg-white border-0 font-medium"
+                    className="w-full bg-white/90 text-gray-900 hover:bg-white border-0 font-medium"
                   >
                     Quick View
                   </UiButton>
@@ -429,7 +416,10 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
               <div className="p-4">
                 <h2
                   className="font-display font-semibold text-lg mb-3 cursor-pointer hover:text-blue-200 transition-colors text-glass tracking-tight leading-tight"
-                  onClick={() => onOpenProduct && onOpenProduct(product)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleProductClick(product);
+                  }}
                 >
                   {product.name}
                 </h2>
@@ -442,7 +432,7 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
                 <div className="flex items-center justify-between mb-4">
                   <span className="font-display font-bold text-xl text-glass tracking-tight">Rs.{product.price}</span>
                   <span
-                    className={`text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm border text-center ${
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm border ${
                       (product.stock || 0) > 0 ? "bg-green-400/30 text-green-100 border-green-300/30" : "bg-red-400/30 text-red-100 border-red-300/30"
                     }`}
                   >
@@ -457,11 +447,12 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
                 variant="contained"
                 color="primary"
                 size="small"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (!isLoggedIn) {
                     promptLogin();
                   } else {
-                    onAddToCart(product);
+                    handleAddToCartAndTrack(product);
                   }
                 }}
                 disabled={(product.stock || 0) === 0}
@@ -476,41 +467,34 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, onOpenProdu
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-2">
-          <UiButton variant="outlined" color="secondary" onClick={() => handlePageChange(pagination.prevPage)} disabled={!pagination.hasPrevPage} className="px-4 py-2">
+        <div className="flex justify-center space-x-2">
+          <UiButton onClick={() => handlePageChange(pagination.currentPage - 1)} disabled={!pagination.hasPrevPage} className="px-4 py-2">
             Previous
           </UiButton>
-
-          <div className="flex items-center space-x-1">
-            {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-              const page = Math.max(1, Math.min(pagination.totalPages - 4, pagination.currentPage - 2)) + i;
-              if (page > pagination.totalPages) return null;
-
-              return (
-                <UiButton key={page} variant={page === pagination.currentPage ? "contained" : "outlined"} color="primary" onClick={() => handlePageChange(page)} className="px-3 py-2 min-w-[40px]">
-                  {page}
-                </UiButton>
-              );
-            })}
-          </div>
-
-          <UiButton variant="outlined" color="secondary" onClick={() => handlePageChange(pagination.nextPage)} disabled={!pagination.hasNextPage} className="px-4 py-2">
+          <span className="flex items-center px-4 py-2 text-glass">
+            Page {pagination.currentPage} of {pagination.totalPages}
+          </span>
+          <UiButton onClick={() => handlePageChange(pagination.currentPage + 1)} disabled={!pagination.hasNextPage} className="px-4 py-2">
             Next
           </UiButton>
         </div>
       )}
 
-      {/* No Results */}
-      {products.length === 0 && !loading && (
-        <div className="text-center py-16 glass p-8 rounded-xl max-w-md mx-auto">
-          <div className="text-6xl mb-6">🔍</div>
-          <h3 className="heading-glass text-3xl font-bold mb-4 tracking-tight">No products found</h3>
-          <p className="text-glass-muted text-lg leading-relaxed">Try adjusting your search or filter criteria to discover more products.</p>
-        </div>
-      )}
-
-      {/* Quick View Modal */}
-      {selectedProduct && <UiProductModal product={selectedProduct} open={showModal} onClose={closeProductModal} onAddToCart={onAddToCart} isLoggedIn={isLoggedIn} promptLogin={promptLogin} />}
+      {/* Product Modal */}
+      <UiProductModal
+        product={selectedProduct}
+        open={showModal}
+        onClose={closeProductModal}
+        onAddToCart={(product) => {
+          if (!isLoggedIn) {
+            promptLogin();
+          } else {
+            handleAddToCartAndTrack(product);
+          }
+        }}
+        isLoggedIn={isLoggedIn}
+        promptLogin={promptLogin}
+      />
     </div>
   );
 }

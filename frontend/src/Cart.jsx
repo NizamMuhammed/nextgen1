@@ -1,9 +1,19 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import UiCard from "./components/ui/UiCard";
 import UiButton from "./components/ui/UiButton";
 
-export default function Cart({ cart, onRemove, onCheckout, isLoggedIn, promptLogin }) {
+export default function Cart({ cart, onRemove, isLoggedIn, promptLogin }) {
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    if (!isLoggedIn) {
+      promptLogin();
+    } else {
+      navigate("/checkout");
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -102,20 +112,7 @@ export default function Cart({ cart, onRemove, onCheckout, isLoggedIn, promptLog
             </div>
 
             <div className="mt-6">
-              <UiButton
-                variant="contained"
-                color="success"
-                onClick={() => {
-                  if (!isLoggedIn) {
-                    promptLogin();
-                  } else {
-                    onCheckout();
-                  }
-                }}
-                fullWidth
-                size="large"
-                className="py-3 text-lg"
-              >
+              <UiButton variant="contained" color="success" onClick={handleCheckout} fullWidth size="large" className="py-3 text-lg">
                 {isLoggedIn ? "Proceed to Checkout" : "Login to Checkout"}
               </UiButton>
             </div>
