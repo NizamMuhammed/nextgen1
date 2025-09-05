@@ -7,6 +7,7 @@ const authRouter = require("./routes/auth");
 const usersRouter = require("./routes/users");
 const ordersRouter = require("./routes/orders");
 const reviewsRouter = require("./routes/reviews");
+const adminRouter = require("./routes/admin");
 const Product = require("./models/Product");
 const path = require("path");
 
@@ -15,7 +16,9 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Atlas connection
-mongoose.connect(process.env.MONGODB_URI, {
+const mongoUri = process.env.MONGODB_URI || "mongodb+srv://admin:L5Rqtki9Q7JcZjb9@cluster0.mongodb.net/nextgen?retryWrites=true&w=majority";
+
+mongoose.connect(mongoUri, {
   // No need for useNewUrlParser or useUnifiedTopology in modern drivers
 });
 
@@ -28,6 +31,7 @@ db.on("error", (err) => {
 });
 db.once("open", () => {
   console.log("Connected to MongoDB Atlas");
+  console.log("Using connection string:", mongoUri);
 });
 
 // Basic route
@@ -61,6 +65,7 @@ app.use("/api/auth", authRouter);
 app.use("/api", usersRouter);
 app.use("/api", ordersRouter);
 app.use("/api", reviewsRouter);
+app.use("/api/admin", adminRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

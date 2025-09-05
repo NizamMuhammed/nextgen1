@@ -1,13 +1,22 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import UiButton from "./UiButton";
 import Logo from "../../pics/NextGen Electronics.png";
+import { FaSearch } from "react-icons/fa";
+import { GoPackage } from "react-icons/go";
+import { LuLayoutDashboard } from "react-icons/lu";
+import { AiOutlineShoppingCart } from "react-icons/ai";
+import { GoChecklist } from "react-icons/go";
+import { MdManageAccounts, MdInventory } from "react-icons/md";
+import { BsFillChatSquareHeartFill } from "react-icons/bs";
 
 export default function UiNavBar({ user, cart, onShowLogin, onShowSignup, onLogout }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState(null);
   const profileRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     onLogout();
@@ -38,99 +47,186 @@ export default function UiNavBar({ user, cart, onShowLogin, onShowSignup, onLogo
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}
-          <div className="flex items-center gap-3 font-display font-bold text-xl cursor-pointer heading-glass" onClick={() => handleNavigation("/")}>
-            <img src={Logo} alt="NextGen Electronics" className="w-10 h-10" />
-            <span className="hidden sm:block">NextGen Electronics</span>
-            <span className="sm:hidden">NextGen</span>
+          <div
+            className={`flex items-center gap-3 font-display font-bold text-xl cursor-pointer heading-glass transition-all duration-300 ease-in-out hover:scale-105 transform ${
+              location.pathname === "/" ? "text-glass" : "text-glass-muted"
+            }`}
+            onClick={() => handleNavigation("/")}
+          >
+            <img src={Logo} alt="NextGen Electronics" className="w-10 h-10 transition-transform duration-300 ease-in-out hover:scale-110" />
+            <span className="hidden sm:block transition-all duration-300 ease-in-out">NextGen Electronics</span>
+            <span className="sm:hidden transition-all duration-300 ease-in-out">NextGen</span>
           </div>
 
           {/* Desktop Navigation Menu */}
           <div className="hidden md:flex items-center h-full">
             {/* Menu Items Container */}
             <div className="flex items-center h-full">
-              {/* Search */}
-              <div className="h-full flex items-center">
-                <div
-                  onClick={() => handleNavigation("/search")}
-                  className="flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-200 font-medium tracking-tight cursor-pointer border-b-2 border-transparent hover:border-white/20"
-                >
-                  🔎 Search
+              {/* Dashboard - Admin Only */}
+              {user && user.role === "admin" && (
+                <div className="h-full flex items-center">
+                  <div
+                    onClick={() => handleNavigation("/dashboard")}
+                    onMouseEnter={() => setHoveredItem("dashboard")}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    className={`flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-300 ease-in-out font-medium tracking-tight cursor-pointer border-b-2 ${
+                      location.pathname === "/dashboard" ? "border-white/20" : "border-transparent"
+                    } hover:scale-105 transform`}
+                  >
+                    <LuLayoutDashboard size={20} className="transition-transform duration-300 ease-in-out hover:scale-110" />
+                    {hoveredItem === "dashboard" && <span className="ml-2 whitespace-nowrap animate-in slide-in-from-left-2 duration-300 ease-out">Dashboard</span>}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Cart */}
-              <div className="relative h-full flex items-center">
-                <div
-                  onClick={() => handleNavigation("/cart")}
-                  className="flex items-center gap-2 px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-200 font-medium tracking-tight cursor-pointer border-b-2 border-transparent hover:border-white/20"
-                >
-                  <span>🛒 Cart</span>
-                  {cart.length > 0 && (
-                    <span className="bg-red-400/90 text-white rounded-full px-2 py-0.5 text-xs font-semibold backdrop-blur-sm border border-red-300/50 shadow-lg">{cartItemCount}</span>
-                  )}
+              {user && user.role === "customer" && (
+                <div className="relative h-full flex items-center">
+                  <div
+                    onClick={() => handleNavigation("/cart")}
+                    onMouseEnter={() => setHoveredItem("cart")}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    className={`flex items-center gap-2 px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-300 ease-in-out font-medium tracking-tight cursor-pointer border-b-2 ${
+                      location.pathname === "/cart" ? "border-white/20" : "border-transparent"
+                    } hover:scale-105 transform`}
+                  >
+                    <AiOutlineShoppingCart size={20} className="transition-transform duration-300 ease-in-out hover:scale-110" />
+                    {hoveredItem === "cart" && <span className="ml-2 whitespace-nowrap animate-in slide-in-from-left-2 duration-300 ease-out">Cart</span>}
+                    {cart.length > 0 && (
+                      <span className="bg-red-400/90 text-white rounded-full px-2 py-0.5 text-xs font-semibold backdrop-blur-sm border border-red-300/50 shadow-lg transition-all duration-300 ease-in-out hover:scale-110">
+                        {cartItemCount}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Orders */}
               {user && (
                 <div className="h-full flex items-center">
                   <div
                     onClick={() => handleNavigation("/orders")}
-                    className="flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-200 font-medium tracking-tight cursor-pointer border-b-2 border-transparent hover:border-white/20"
+                    onMouseEnter={() => setHoveredItem("orders")}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    className={`flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-300 ease-in-out font-medium tracking-tight cursor-pointer border-b-2 ${
+                      location.pathname === "/orders" ? "border-white/20" : "border-transparent"
+                    } hover:scale-105 transform`}
                   >
-                    📄 Orders
+                    <GoChecklist size={20} className="transition-transform duration-300 ease-in-out hover:scale-110" />
+                    {hoveredItem === "orders" && <span className="ml-2 whitespace-nowrap animate-in slide-in-from-left-2 duration-300 ease-out">Orders</span>}
                   </div>
                 </div>
               )}
 
               {/* Wishlist */}
-              {user && (
+              {user && user.role === "customer" && (
                 <div className="h-full flex items-center">
                   <div
                     onClick={() => handleNavigation("/wishlist")}
-                    className="flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-200 font-medium tracking-tight cursor-pointer border-b-2 border-transparent hover:border-white/20"
+                    onMouseEnter={() => setHoveredItem("wishlist")}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    className={`flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-300 ease-in-out font-medium tracking-tight cursor-pointer border-b-2 ${
+                      location.pathname === "/wishlist" ? "border-white/20" : "border-transparent"
+                    } hover:scale-105 transform`}
                   >
-                    💝 Wishlist
+                    <BsFillChatSquareHeartFill size={20} className="transition-transform duration-300 ease-in-out hover:scale-110" />
+                    {hoveredItem === "wishlist" && <span className="ml-2 whitespace-nowrap animate-in slide-in-from-left-2 duration-300 ease-out">Wishlist</span>}
                   </div>
                 </div>
               )}
 
-              {/* Track Order */}
+              {/* Search */}
+              <div className="h-full flex items-center">
+                <div
+                  onClick={() => handleNavigation("/search")}
+                  onMouseEnter={() => setHoveredItem("search")}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className={`flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-300 ease-in-out font-medium tracking-tight cursor-pointer border-b-2 ${
+                    location.pathname === "/search" ? "border-white/20" : "border-transparent"
+                  } hover:scale-105 transform`}
+                >
+                  <FaSearch size={20} className="transition-transform duration-300 ease-in-out hover:scale-110" />
+                  {hoveredItem === "search" && <span className="ml-2 whitespace-nowrap animate-in slide-in-from-left-2 duration-300 ease-out">Search</span>}
+                </div>
+              </div>
               <div className="h-full flex items-center">
                 <div
                   onClick={() => handleNavigation("/tracking")}
-                  className="flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-200 font-medium tracking-tight cursor-pointer border-b-2 border-transparent hover:border-white/20"
+                  onMouseEnter={() => setHoveredItem("tracking")}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className={`flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-300 ease-in-out font-medium tracking-tight cursor-pointer border-b-2 ${
+                    location.pathname === "/tracking" ? "border-white/20" : "border-transparent"
+                  } hover:scale-105 transform`}
                 >
-                  📦 Track
+                  <GoPackage size={20} className="transition-transform duration-300 ease-in-out hover:scale-110" />
+                  {hoveredItem === "tracking" && <span className="ml-2 whitespace-nowrap animate-in slide-in-from-left-2 duration-300 ease-out">Track Order</span>}
                 </div>
               </div>
 
-              {/* Admin Menu */}
+              {/* Admin - Manage Products */}
               {user && user.role === "admin" && (
-                <div className="relative h-full flex items-center group">
-                  <div className="flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-200 font-medium tracking-tight cursor-pointer border-b-2 border-transparent hover:border-white/20">
-                    <span className="flex items-center gap-1">
-                      ⚙️ Admin
-                      <svg className="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </span>
+                <div className="h-full flex items-center">
+                  <div
+                    onClick={() => handleNavigation("/manage-products")}
+                    onMouseEnter={() => setHoveredItem("admin-manage-products")}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    className={`flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-300 ease-in-out font-medium tracking-tight cursor-pointer border-b-2 ${
+                      location.pathname === "/manage-products" ? "border-white/20" : "border-transparent"
+                    } hover:scale-105 transform`}
+                  >
+                    <MdInventory size={20} className="transition-transform duration-300 ease-in-out hover:scale-110" />
+                    {hoveredItem === "admin-manage-products" && <span className="ml-2 whitespace-nowrap animate-in slide-in-from-left-2 duration-300 ease-out">Manage Products</span>}
                   </div>
-                  <div className="absolute top-full left-0 w-48 glass-strong rounded-b-lg shadow-xl border border-white/20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top">
-                    <div className="py-1">
-                      <div
-                        onClick={() => handleNavigation("/manage-products")}
-                        className="block w-full text-left px-4 py-2 text-glass-muted hover:text-glass hover:bg-white/10 transition-colors duration-150 cursor-pointer"
-                      >
-                        Manage Products
-                      </div>
-                      <div
-                        onClick={() => handleNavigation("/manage-users")}
-                        className="block w-full text-left px-4 py-2 text-glass-muted hover:text-glass hover:bg-white/10 transition-colors duration-150 cursor-pointer"
-                      >
-                        Manage Users
-                      </div>
-                    </div>
+                </div>
+              )}
+
+              {/* Admin - Manage Users */}
+              {user && user.role === "admin" && (
+                <div className="h-full flex items-center">
+                  <div
+                    onClick={() => handleNavigation("/manage-users")}
+                    onMouseEnter={() => setHoveredItem("admin-manage-users")}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    className={`flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-300 ease-in-out font-medium tracking-tight cursor-pointer border-b-2 ${
+                      location.pathname === "/manage-users" ? "border-white/20" : "border-transparent"
+                    } hover:scale-105 transform`}
+                  >
+                    <MdManageAccounts size={20} className="transition-transform duration-300 ease-in-out hover:scale-110" />
+                    {hoveredItem === "admin-manage-users" && <span className="ml-2 whitespace-nowrap animate-in slide-in-from-left-2 duration-300 ease-out">Manage Users</span>}
+                  </div>
+                </div>
+              )}
+
+              {/* Staff - Manage Products */}
+              {user && user.role === "staff" && (
+                <div className="h-full flex items-center">
+                  <div
+                    onClick={() => handleNavigation("/manage-products")}
+                    onMouseEnter={() => setHoveredItem("manage-products")}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    className={`flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-300 ease-in-out font-medium tracking-tight cursor-pointer border-b-2 ${
+                      location.pathname === "/manage-products" ? "border-white/20" : "border-transparent"
+                    } hover:scale-105 transform`}
+                  >
+                    <MdInventory size={20} className="transition-transform duration-300 ease-in-out hover:scale-110" />
+                    {hoveredItem === "manage-products" && <span className="ml-2 whitespace-nowrap animate-in slide-in-from-left-2 duration-300 ease-out">Manage Products</span>}
+                  </div>
+                </div>
+              )}
+
+              {/* Staff - Manage Users */}
+              {user && user.role === "staff" && (
+                <div className="h-full flex items-center">
+                  <div
+                    onClick={() => handleNavigation("/manage-users")}
+                    onMouseEnter={() => setHoveredItem("manage-users")}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    className={`flex items-center px-6 h-full text-glass-muted hover:text-glass hover:bg-white/5 transition-all duration-300 ease-in-out font-medium tracking-tight cursor-pointer border-b-2 ${
+                      location.pathname === "/manage-users" ? "border-white/20" : "border-transparent"
+                    } hover:scale-105 transform`}
+                  >
+                    <MdManageAccounts size={20} className="transition-transform duration-300 ease-in-out hover:scale-110" />
+                    {hoveredItem === "manage-users" && <span className="ml-2 whitespace-nowrap animate-in slide-in-from-left-2 duration-300 ease-out">Manage Users</span>}
                   </div>
                 </div>
               )}
@@ -157,23 +253,26 @@ export default function UiNavBar({ user, cart, onShowLogin, onShowSignup, onLogo
 
                 {/* Profile Dropdown */}
                 {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-56 glass-strong rounded-lg shadow-xl border border-white/20 animate-in slide-in-from-top-2">
+                  <div className="absolute right-0 mt-2 w-56 bg-purple-800 rounded-lg shadow-xl border border-white/20 animate-in slide-in-from-top-2">
                     <div className="py-2">
                       {/* User Info */}
                       <div className="px-4 py-3 border-b border-white/10">
                         <p className="text-glass font-semibold">{user.name || "User"}</p>
                         <p className="text-glass-muted text-sm">{user.email}</p>
                         {user.role === "admin" && <span className="inline-block mt-1 px-2 py-1 bg-purple-400/20 text-purple-300 text-xs rounded-full border border-purple-300/30">Administrator</span>}
+                        {user.role === "staff" && <span className="inline-block mt-1 px-2 py-1 bg-blue-400/20 text-blue-300 text-xs rounded-full border border-blue-300/30">Staff</span>}
                       </div>
 
                       {/* Menu Items */}
                       <div className="py-1">
                         <div
                           onClick={() => {
-                            console.log("Settings clicked");
+                            handleNavigation("/settings");
                             setIsProfileOpen(false);
                           }}
-                          className="flex items-center w-full px-4 py-2 text-glass-muted hover:text-glass hover:bg-white/10 transition-colors duration-150 cursor-pointer"
+                          className={`flex items-center w-full px-4 py-2 transition-colors duration-150 cursor-pointer ${
+                            location.pathname === "/settings" ? "text-glass bg-white/10" : "text-glass-muted hover:text-glass hover:bg-white/10"
+                          }`}
                         >
                           <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -250,43 +349,74 @@ export default function UiNavBar({ user, cart, onShowLogin, onShowSignup, onLogo
           <div className="md:hidden glass-strong rounded-lg mt-2 border border-white/20 animate-in slide-in-from-top-2">
             <div className="px-2 py-2 space-y-1">
               <div
-                onClick={() => handleNavigation("/search")}
-                className="flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer"
+                onClick={() => handleNavigation("/")}
+                className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                  location.pathname === "/" ? "bg-white/10" : ""
+                }`}
               >
-                🔎 Search
+                🏠 Home
               </div>
+              {user && user.role === "admin" && (
+                <div
+                  onClick={() => handleNavigation("/dashboard")}
+                  className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                    location.pathname === "/dashboard" ? "bg-white/10" : ""
+                  }`}
+                >
+                  📊 Dashboard
+                </div>
+              )}
 
-              <div
-                onClick={() => handleNavigation("/cart")}
-                className="flex items-center justify-between w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer"
-              >
-                <span className="flex items-center gap-2">
-                  🛒 Cart
-                  {cart.length > 0 && <span className="bg-red-400/90 text-white rounded-full px-2 py-0.5 text-xs font-semibold">{cartItemCount}</span>}
-                </span>
-              </div>
+              {user && user.role === "customer" && (
+                <div
+                  onClick={() => handleNavigation("/cart")}
+                  className={`flex items-center justify-between w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                    location.pathname === "/cart" ? "bg-white/10" : ""
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    🛒 Cart
+                    {cart.length > 0 && <span className="bg-red-400/90 text-white rounded-full px-2 py-0.5 text-xs font-semibold">{cartItemCount}</span>}
+                  </span>
+                </div>
+              )}
 
-              {user && (
+              {user && user.role === "customer" && (
                 <div
                   onClick={() => handleNavigation("/orders")}
-                  className="flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer"
+                  className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                    location.pathname === "/orders" ? "bg-white/10" : ""
+                  }`}
                 >
                   📄 My Orders
                 </div>
               )}
 
-              {user && (
+              {user && user.role === "customer" && (
                 <div
                   onClick={() => handleNavigation("/wishlist")}
-                  className="flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer"
+                  className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                    location.pathname === "/wishlist" ? "bg-white/10" : ""
+                  }`}
                 >
                   💝 Wishlist
                 </div>
               )}
 
               <div
+                onClick={() => handleNavigation("/search")}
+                className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                  location.pathname === "/search" ? "bg-white/10" : ""
+                }`}
+              >
+                🔍 Search
+              </div>
+
+              <div
                 onClick={() => handleNavigation("/tracking")}
-                className="flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer"
+                className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                  location.pathname === "/tracking" ? "bg-white/10" : ""
+                }`}
               >
                 📦 Track Order
               </div>
@@ -296,13 +426,39 @@ export default function UiNavBar({ user, cart, onShowLogin, onShowSignup, onLogo
                   <div className="border-t border-white/10 my-1"></div>
                   <div
                     onClick={() => handleNavigation("/manage-products")}
-                    className="flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer"
+                    className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                      location.pathname === "/manage-products" ? "bg-white/10" : ""
+                    }`}
                   >
-                    ⚙️ Manage Products
+                    📦 Manage Products
                   </div>
                   <div
                     onClick={() => handleNavigation("/manage-users")}
-                    className="flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer"
+                    className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                      location.pathname === "/manage-users" ? "bg-white/10" : ""
+                    }`}
+                  >
+                    👥 Manage Users
+                  </div>
+                </>
+              )}
+
+              {user && user.role === "staff" && (
+                <>
+                  <div className="border-t border-white/10 my-1"></div>
+                  <div
+                    onClick={() => handleNavigation("/manage-products")}
+                    className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                      location.pathname === "/manage-products" ? "bg-white/10" : ""
+                    }`}
+                  >
+                    📦 Manage Products
+                  </div>
+                  <div
+                    onClick={() => handleNavigation("/manage-users")}
+                    className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                      location.pathname === "/manage-users" ? "bg-white/10" : ""
+                    }`}
                   >
                     👥 Manage Users
                   </div>

@@ -33,6 +33,15 @@ const adminOnly = (req, res, next) => {
   }
 };
 
+// Staff or Admin middleware
+const staffOrAdmin = (req, res, next) => {
+  if (req.user && (req.user.role === "staff" || req.user.role === "admin")) {
+    next();
+  } else {
+    res.status(403).json({ error: "Staff or Admin access required" });
+  }
+};
+
 // Multer setup for image uploads with memory storage
 const storage = multer.memoryStorage(); // Use memory storage for processing
 const upload = multer({
@@ -332,7 +341,7 @@ router.get("/products/stats", async (req, res) => {
 });
 
 // POST /api/products/upload-image - Upload and process product image
-router.post("/products/upload-image", protect, adminOnly, upload.single("image"), async (req, res) => {
+router.post("/products/upload-image", protect, staffOrAdmin, upload.single("image"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -379,7 +388,7 @@ router.get("/products/:id", async (req, res) => {
 });
 
 // POST /api/products - Add a new product (Admin only)
-router.post("/products", protect, adminOnly, async (req, res) => {
+router.post("/products", protect, staffOrAdmin, async (req, res) => {
   try {
     const { name, description, price, category, brand, images, stock } = req.body;
     if (!name || !price || !category || !brand || !Array.isArray(images) || images.length === 0) {
@@ -401,7 +410,7 @@ router.post("/products", protect, adminOnly, async (req, res) => {
 });
 
 // PUT /api/products/:id - Update a product by ID (Admin only)
-router.put("/products/:id", protect, adminOnly, async (req, res) => {
+router.put("/products/:id", protect, staffOrAdmin, async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!product) {

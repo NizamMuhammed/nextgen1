@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import UiCard from "./components/ui/UiCard";
 import UiTextField from "./components/ui/UiTextField";
 import UiButton from "./components/ui/UiButton";
+import UIValidation from "./components/ui/UIValidation";
 import imageCompression from "browser-image-compression";
 
 // Added categories array for use in the form
@@ -33,6 +34,7 @@ export default function ManageProducts({ token }) {
   const [categories, setCategories] = useState(categoriesList);
   const [editingId, setEditingId] = useState(null);
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -80,7 +82,13 @@ export default function ManageProducts({ token }) {
   }, []);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+
+    // Clear validation error when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => ({ ...prev, [name]: null }));
+    }
   };
 
   const handleImageChange = async (e) => {
@@ -135,8 +143,44 @@ export default function ManageProducts({ token }) {
     }
   };
 
+  const validateForm = () => {
+    const errors = {};
+
+    if (!form.name.trim()) {
+      errors.name = "Please enter a product name.";
+    } else if (form.name.trim().length < 2) {
+      errors.name = "Product name must be at least 2 characters long.";
+    }
+
+    if (!form.description.trim()) {
+      errors.description = "Please enter a product description.";
+    } else if (form.description.trim().length < 10) {
+      errors.description = "Description must be at least 10 characters long.";
+    }
+
+    if (!form.price || form.price <= 0) {
+      errors.price = "Please enter a valid price greater than 0.";
+    }
+
+    if (!form.category) {
+      errors.category = "Please select a product category.";
+    }
+
+    if (!form.stock || form.stock < 0) {
+      errors.stock = "Please enter a valid stock quantity (0 or greater).";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setSuccess(null);
     setError(null);
 
@@ -233,14 +277,23 @@ export default function ManageProducts({ token }) {
 
         <form onSubmit={handleSubmit} className="space-y-6 flex flex-col">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UiTextField label="Name" name="name" value={form.name} onChange={handleChange} required />
-            <UiTextField label="Price" name="price" type="number" step="0.01" value={form.price} onChange={handleChange} required />
+            <div className="relative">
+              <UiTextField label="Name" name="name" value={form.name} onChange={handleChange} required />
+              <UIValidation message={validationErrors.name} position="top" type="error" visible={!!validationErrors.name} />
+            </div>
+            <div className="relative">
+              <UiTextField label="Price" name="price" type="number" step="0.01" value={form.price} onChange={handleChange} required />
+              <UIValidation message={validationErrors.price} position="top" type="error" visible={!!validationErrors.price} />
+            </div>
           </div>
 
-          <UiTextField label="Description" name="description" value={form.description} onChange={handleChange} required multiline minRows={2} />
+          <div className="relative">
+            <UiTextField label="Description" name="description" value={form.description} onChange={handleChange} required multiline minRows={2} />
+            <UIValidation message={validationErrors.description} position="top" type="error" visible={!!validationErrors.description} />
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="relative">
               <label className="block font-medium mb-1">Category</label>
               <select name="category" value={form.category} onChange={handleChange} required className="w-full rounded-lg border px-3 py-2">
                 <option value="">Select category</option>
@@ -251,9 +304,13 @@ export default function ManageProducts({ token }) {
                     </option>
                   ))}
               </select>
+              <UIValidation message={validationErrors.category} position="top" type="error" visible={!!validationErrors.category} />
             </div>
 
-            <UiTextField label="Stock" name="stock" type="number" value={form.stock} onChange={handleChange} required />
+            <div className="relative">
+              <UiTextField label="Stock" name="stock" type="number" value={form.stock} onChange={handleChange} required />
+              <UIValidation message={validationErrors.stock} position="top" type="error" visible={!!validationErrors.stock} />
+            </div>
           </div>
 
           <div>

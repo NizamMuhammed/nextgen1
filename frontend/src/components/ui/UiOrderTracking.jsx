@@ -2,17 +2,58 @@ import React, { useState } from "react";
 import UiCard from "./UiCard";
 import UiButton from "./UiButton";
 import UiTextField from "./UiTextField";
+import UIValidation from "./UIValidation";
 
 export default function UiOrderTracking() {
   const [orderNumber, setOrderNumber] = useState("");
   const [email, setEmail] = useState("");
   const [trackingResult, setTrackingResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
+
+  const handleOrderNumberChange = (e) => {
+    const value = e.target.value;
+    setOrderNumber(value);
+    
+    // Clear validation error when user starts typing
+    if (validationErrors.orderNumber) {
+      setValidationErrors((prev) => ({ ...prev, orderNumber: null }));
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    
+    // Clear validation error when user starts typing
+    if (validationErrors.email) {
+      setValidationErrors((prev) => ({ ...prev, email: null }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    if (!orderNumber.trim()) {
+      errors.orderNumber = "Please enter your order number.";
+    } else if (orderNumber.trim().length < 3) {
+      errors.orderNumber = "Order number must be at least 3 characters long.";
+    }
+
+    if (!email.trim()) {
+      errors.email = "Please enter your email address.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = "Please enter a valid email address.";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleTrackOrder = async (e) => {
     e.preventDefault();
-    if (!orderNumber.trim() || !email.trim()) {
-      alert("Please enter both order number and email");
+    
+    if (!validateForm()) {
       return;
     }
 
@@ -81,8 +122,28 @@ export default function UiOrderTracking() {
       <UiCard className="max-w-2xl mx-auto">
         <form onSubmit={handleTrackOrder} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UiTextField label="Order Number" value={orderNumber} onChange={(e) => setOrderNumber(e.target.value)} placeholder="Enter your order number" required />
-            <UiTextField label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required />
+            <div className="relative">
+              <UiTextField 
+                label="Order Number" 
+                value={orderNumber} 
+                onChange={handleOrderNumberChange} 
+                placeholder="Enter your order number" 
+                required 
+              />
+              <UIValidation message={validationErrors.orderNumber} position="top" type="error" visible={!!validationErrors.orderNumber} />
+            </div>
+            
+            <div className="relative">
+              <UiTextField 
+                label="Email Address" 
+                type="email" 
+                value={email} 
+                onChange={handleEmailChange} 
+                placeholder="Enter your email" 
+                required 
+              />
+              <UIValidation message={validationErrors.email} position="top" type="error" visible={!!validationErrors.email} />
+            </div>
           </div>
 
           <UiButton type="submit" variant="contained" color="primary" fullWidth disabled={loading}>

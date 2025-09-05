@@ -19,6 +19,20 @@ const shippingAddressSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema(
   {
+    orderNumber: {
+      type: String,
+      unique: true,
+      required: true,
+      default: function () {
+        // Generate unique order number: ORD-YYYYMMDD-XXXXX
+        const date = new Date();
+        const dateStr = date.getFullYear().toString() + (date.getMonth() + 1).toString().padStart(2, "0") + date.getDate().toString().padStart(2, "0");
+        const random = Math.floor(Math.random() * 100000)
+          .toString()
+          .padStart(5, "0");
+        return `ORD-${dateStr}-${random}`;
+      },
+    },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     orderItems: [orderItemSchema],
     shippingAddress: shippingAddressSchema,
@@ -39,7 +53,7 @@ const orderSchema = new mongoose.Schema(
     deliveredAt: Date,
     status: {
       type: String,
-      enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
+      enum: ["pending", "packing", "on_delivery", "delivered", "cancelled"],
       default: "pending",
     },
     trackingNumber: String,

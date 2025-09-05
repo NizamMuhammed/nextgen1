@@ -1,45 +1,111 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import UiCard from "./UiCard";
 import UiButton from "./UiButton";
 import UiProductModal from "./UiProductModal";
+import UiToast from "./UiToast";
+import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
+import { PiImageBrokenDuotone } from "react-icons/pi";
+import { CircularProgress, Box, Typography } from "@mui/material";
 
-export default function UiWishlist({ isLoggedIn, promptLogin }) {
+export default function UiWishlist({ isLoggedIn, promptLogin, token, onAddToCart }) {
   const [wishlist, setWishlist] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const navigate = useNavigate();
+
+  // Fetch wishlist from backend
+  const fetchWishlist = async () => {
+    if (!isLoggedIn || !token) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:5000/api/users/me/wishlist", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setWishlist(data);
+      } else {
+        console.error("Failed to fetch wishlist");
+        setWishlist([]);
+      }
+    } catch (error) {
+      console.error("Error fetching wishlist:", error);
+      setWishlist([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const savedWishlist = localStorage.getItem("wishlist");
-    if (savedWishlist) {
-      setWishlist(JSON.parse(savedWishlist));
-    }
-  }, []);
+    fetchWishlist();
+  }, [isLoggedIn, token]);
 
-  const addToWishlist = (product) => {
+  const addToWishlist = async (product) => {
     if (!isLoggedIn) {
       promptLogin();
       return;
     }
 
-    const updatedWishlist = [...wishlist];
-    const existingIndex = updatedWishlist.findIndex((item) => item._id === product._id);
+    try {
+      const response = await fetch("http://localhost:5000/api/users/me/wishlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId: product._id }),
+      });
 
-    if (existingIndex === -1) {
-      updatedWishlist.push(product);
-      setWishlist(updatedWishlist);
-      localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+      if (response.ok) {
+        setToast({ show: true, message: "Product added to wishlist!", type: "success" });
+        fetchWishlist(); // Refresh wishlist
+      } else {
+        const data = await response.json();
+        setToast({ show: true, message: data.error || "Failed to add to wishlist", type: "error" });
+      }
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      setToast({ show: true, message: "Failed to add to wishlist", type: "error" });
     }
   };
 
-  const removeFromWishlist = (productId) => {
-    const updatedWishlist = wishlist.filter((item) => item._id !== productId);
-    setWishlist(updatedWishlist);
-    localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+  const removeFromWishlist = async (productId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/users/me/wishlist/${productId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        setToast({ show: true, message: "Product removed from wishlist", type: "success" });
+        fetchWishlist(); // Refresh wishlist
+      } else {
+        const data = await response.json();
+        setToast({ show: true, message: data.error || "Failed to remove from wishlist", type: "error" });
+      }
+    } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      setToast({ show: true, message: "Failed to remove from wishlist", type: "error" });
+    }
   };
 
   const moveToCart = (product) => {
-    // This would typically call the add to cart function
-    // For now, we'll just remove from wishlist
+    if (onAddToCart) {
+      onAddToCart(product);
+      setToast({ show: true, message: "Product moved to cart!", type: "success" });
+    }
     removeFromWishlist(product._id);
   };
 
@@ -51,6 +117,10 @@ export default function UiWishlist({ isLoggedIn, promptLogin }) {
   const closeProductModal = () => {
     setShowModal(false);
     setSelectedProduct(null);
+  };
+
+  const handleProductClick = (product) => {
+    navigate(`/product/${product._id}`);
   };
 
   if (!isLoggedIn) {
@@ -65,59 +135,130 @@ export default function UiWishlist({ isLoggedIn, promptLogin }) {
     );
   }
 
+  if (loading) {
+    return (
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="400px" sx={{ color: "primary.main" }}>
+        <CircularProgress size={60} thickness={4} />
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 2, fontWeight: 500 }}>
+          Loading wishlist...
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">My Wishlist</h1>
+    <div className="space-y-8">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-8 h-8 glass-subtle rounded-lg flex items-center justify-center">
+          <MdFavorite className="w-5 h-5 text-red-500" />
+        </div>
+        <h1 className="heading-glass text-3xl font-semibold tracking-tight">My Wishlist</h1>
+      </div>
 
       {wishlist.length === 0 ? (
         <UiCard className="text-center py-12">
           <div className="text-gray-500 mb-4">
-            <svg className="w-16 h-16 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-            </svg>
+            <MdFavoriteBorder className="w-16 h-16 mx-auto mb-4 text-gray-400" />
           </div>
-          <h3 className="text-xl font-semibold mb-2">Your wishlist is empty</h3>
-          <p className="text-gray-600 mb-6">Start adding products to your wishlist to save them for later.</p>
+          <h3 className="heading-glass text-xl font-semibold mb-2">Your wishlist is empty</h3>
+          <p className="text-glass-muted mb-6">Start adding products to your wishlist to save them for later.</p>
         </UiCard>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {wishlist.map((product) => (
-            <UiCard key={product._id} className="flex flex-col h-full">
+            <UiCard key={product._id} className="flex flex-col h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
               <div className="flex-1">
-                {/* Product Image */}
-                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
+                {/* Product Image (go to details page) */}
+                <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden cursor-pointer group relative" onClick={() => handleProductClick(product)}>
                   {product.images && product.images.length > 0 ? (
                     <img
-                      src={`http://localhost:5000${product.images[0]}`}
+                      src={product.images[0].startsWith("http") ? product.images[0] : `http://localhost:5000${product.images[0]}`}
                       alt={product.name}
-                      className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                      onClick={() => openProductModal(product)}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.nextSibling.style.display = "flex";
+                      }}
+                      onLoad={(e) => {
+                        e.target.nextSibling.style.display = "none";
+                      }}
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
-                  )}
+                  ) : null}
+                  <div className="w-full h-full flex items-center justify-center text-gray-400" style={{ display: product.images && product.images.length > 0 ? "flex" : "flex" }}>
+                    <div className="text-center">
+                      <PiImageBrokenDuotone className="w-16 h-16 mx-auto mb-2" />
+                      <p className="text-xs text-gray-500">No Image</p>
+                    </div>
+                  </div>
+
+                  {/* Wishlist Heart Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFromWishlist(product._id);
+                    }}
+                    className="absolute top-3 right-3 p-2 rounded-full bg-white/90 hover:bg-white transition-colors duration-200 shadow-lg"
+                    title="Remove from wishlist"
+                  >
+                    <MdFavorite className="w-5 h-5 text-red-500" />
+                  </button>
+
+                  {/* Quick View Overlay Button */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <UiButton
+                      variant="contained"
+                      color="secondary"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openProductModal(product);
+                      }}
+                      className="w-full bg-white/90 text-gray-900 hover:bg-white border-0 font-medium"
+                    >
+                      Quick View
+                    </UiButton>
+                  </div>
                 </div>
 
-                {/* Product Info */}
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-lg cursor-pointer hover:text-blue-600" onClick={() => openProductModal(product)}>
+                <div className="p-4">
+                  <h2
+                    className="font-display font-semibold text-lg mb-3 cursor-pointer hover:text-blue-200 transition-colors text-glass tracking-tight leading-tight"
+                    onClick={() => handleProductClick(product)}
+                  >
                     {product.name}
-                  </h3>
-                  <div className="text-sm text-gray-500">
-                    {product.brand} • {product.category}
+                  </h2>
+                  <div className="text-sm mb-4 flex flex-wrap gap-2">
+                    <span className="bg-blue-400/30 text-blue-100 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-blue-300/30">{product.brand}</span>
+                    <span className="bg-purple-400/30 text-purple-100 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-purple-300/30">{product.category}</span>
                   </div>
-                  <div className="text-xl font-bold text-blue-600">${product.price}</div>
-                  <div className="text-sm text-gray-600">Stock: {product.stock || 0} units</div>
+                  <p className="mb-4 text-glass-muted text-sm line-clamp-2 leading-relaxed tracking-tight">{product.description}</p>
+
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-display font-bold text-xl text-glass tracking-tight">Rs.{product.price}</span>
+                    <span
+                      className={`text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm border ${
+                        (product.stock || 0) > 0 ? "bg-green-400/30 text-green-100 border-green-300/30" : "bg-red-400/30 text-red-100 border-red-300/30"
+                      }`}
+                    >
+                      {(product.stock || 0) > 0 ? `In Stock (${product.stock})` : "Out of Stock"}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex space-x-2 mt-4">
-                <UiButton onClick={() => moveToCart(product)} variant="contained" color="primary" size="small" fullWidth disabled={(product.stock || 0) === 0}>
-                  Move to Cart
-                </UiButton>
-                <UiButton onClick={() => removeFromWishlist(product._id)} variant="outlined" color="error" size="small">
-                  Remove
+              <div className="p-4 pt-0">
+                <UiButton
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveToCart(product);
+                  }}
+                  disabled={(product.stock || 0) === 0}
+                  className="w-full"
+                >
+                  {(product.stock || 0) === 0 ? "Out of Stock" : "Move to Cart"}
                 </UiButton>
               </div>
             </UiCard>
@@ -127,6 +268,9 @@ export default function UiWishlist({ isLoggedIn, promptLogin }) {
 
       {/* Product Modal */}
       {selectedProduct && <UiProductModal product={selectedProduct} open={showModal} onClose={closeProductModal} onAddToCart={moveToCart} isLoggedIn={isLoggedIn} promptLogin={promptLogin} />}
+
+      {/* Toast Notification */}
+      <UiToast show={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ show: false, message: "", type: "success" })} />
     </div>
   );
 }

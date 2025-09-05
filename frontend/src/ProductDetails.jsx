@@ -2,33 +2,52 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import UiCard from "./components/ui/UiCard";
 import UiButton from "./components/ui/UiButton";
+import UiToast from "./components/ui/UiToast";
+import { useWishlist } from "./hooks/useWishlist";
+import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
+import ReviewSubmission from "./components/ReviewSubmission";
+import ReviewDisplay from "./components/ReviewDisplay";
 
-export default function ProductDetails({ onAddToCart, isLoggedIn, promptLogin, token }) {
+export default function ProductDetails({ onAddToCart, isLoggedIn, promptLogin, token, refreshTrigger }) {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [reviewsRefreshTrigger, setReviewsRefreshTrigger] = useState(0);
   const { productId } = useParams();
   const navigate = useNavigate();
 
+  // Wishlist functionality
+  const { toggleWishlist, isInWishlist } = useWishlist(isLoggedIn, token);
+
+  const fetchProduct = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`http://localhost:5000/api/products/${productId}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load product");
+      setProduct(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchProduct = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(`http://localhost:5000/api/products/${productId}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to load product");
-        setProduct(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
     if (productId) fetchProduct();
   }, [productId]);
+
+  // Refresh product when refreshTrigger changes (e.g., after order completion)
+  useEffect(() => {
+    if (refreshTrigger > 0 && productId) {
+      console.log("Refreshing product details due to refresh trigger");
+      fetchProduct();
+    }
+  }, [refreshTrigger, productId]);
 
   // Update last viewed on load (persist for logged-in users and guests)
   useEffect(() => {
@@ -78,6 +97,26 @@ export default function ProductDetails({ onAddToCart, isLoggedIn, promptLogin, t
 
   const handleBack = () => {
     navigate(-1); // Go back to previous page
+  };
+
+  const handleWishlistToggle = async () => {
+    if (!isLoggedIn) {
+      promptLogin();
+      return;
+    }
+
+    try {
+      const result = await toggleWishlist(product);
+      setToast({ show: true, message: result.message, type: result.success ? "success" : "error" });
+    } catch (error) {
+      setToast({ show: true, message: "Please log in to use wishlist", type: "error" });
+    }
+  };
+
+  const handleReviewSubmitted = () => {
+    // Trigger refresh of reviews and product data
+    setReviewsRefreshTrigger((prev) => prev + 1);
+    fetchProduct(); // Refresh product to update rating averages
   };
 
   if (loading)
@@ -223,21 +262,47 @@ export default function ProductDetails({ onAddToCart, isLoggedIn, promptLogin, t
                 </div>
               </div>
 
-              <UiButton
-                onClick={() => {
-                  if (!isLoggedIn) return promptLogin();
-                  onAddToCart && onAddToCart({ ...product, quantity });
-                }}
-                variant="contained"
-                color="primary"
-                disabled={(product.stock || 0) === 0}
-              >
-                {(product.stock || 0) === 0 ? "Out of Stock" : "Add to Cart"}
-              </UiButton>
+              <div className="flex space-x-3">
+                <UiButton
+                  onClick={() => {
+                    if (!isLoggedIn) return promptLogin();
+                    onAddToCart && onAddToCart({ ...product, quantity });
+                  }}
+                  variant="contained"
+                  color="primary"
+                  disabled={(product.stock || 0) === 0}
+                  className="flex-1"
+                >
+                  {(product.stock || 0) === 0 ? "Out of Stock" : "Add to Cart"}
+                </UiButton>
+
+                <UiButton onClick={handleWishlistToggle} variant="outlined" color="secondary" className="px-4" title={isInWishlist(product._id) ? "Remove from wishlist" : "Add to wishlist"}>
+                  {isInWishlist(product._id) ? <MdFavorite className="w-5 h-5 text-red-500" /> : <MdFavoriteBorder className="w-5 h-5" />}
+                </UiButton>
+              </div>
             </div>
           </div>
         </div>
       </UiCard>
+
+      {/* Reviews Section */}
+      <div className="space-y-6">
+        <h2 className="heading-glass text-2xl font-bold tracking-tight">Reviews & Ratings</h2>
+
+        {/* Review Submission */}
+        <ReviewSubmission productId={productId} isLoggedIn={isLoggedIn} token={token} onReviewSubmitted={handleReviewSubmitted} />
+
+        {/* Review Display */}
+        <ReviewDisplay
+          productId={productId}
+          isLoggedIn={isLoggedIn}
+          token={token}
+          key={reviewsRefreshTrigger} // Force re-render when reviews are updated
+        />
+      </div>
+
+      {/* Toast Notification */}
+      <UiToast show={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ show: false, message: "", type: "success" })} />
     </div>
   );
 }

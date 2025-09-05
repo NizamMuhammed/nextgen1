@@ -4,7 +4,7 @@ import UiCard from "./components/ui/UiCard";
 import UiButton from "./components/ui/UiButton";
 import UiSearchFilter from "./components/ui/UiSearchFilter";
 
-export default function Search({ onAddToCart, isLoggedIn, promptLogin }) {
+export default function Search({ onAddToCart, isLoggedIn, promptLogin, refreshTrigger }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,6 +97,14 @@ export default function Search({ onAddToCart, isLoggedIn, promptLogin }) {
     fetchMeta();
     fetchProducts(initialFilters);
   }, []);
+
+  // Refresh products when refreshTrigger changes (e.g., after order completion)
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      console.log("Refreshing search products due to refresh trigger");
+      fetchProducts(filters);
+    }
+  }, [refreshTrigger]);
 
   const handleSearch = (searchTerm) => {
     const newFilters = { ...filters, search: searchTerm, page: 1 };

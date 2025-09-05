@@ -4,8 +4,13 @@ import UiCard from "./components/ui/UiCard";
 import UiButton from "./components/ui/UiButton";
 import UiSearchFilter from "./components/ui/UiSearchFilter";
 import UiProductModal from "./components/ui/UiProductModal";
+import UiToast from "./components/ui/UiToast";
+import { useWishlist } from "./hooks/useWishlist";
+import { MdOutlineRemoveRedEye, MdFavorite, MdFavoriteBorder } from "react-icons/md";
+import { PiImageBrokenDuotone } from "react-icons/pi";
+import { CircularProgress, Box, Typography } from "@mui/material";
 
-export default function Home({ onAddToCart, isLoggedIn, promptLogin, token }) {
+export default function Home({ onAddToCart, isLoggedIn, promptLogin, token, refreshTrigger }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,7 +19,11 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, token }) {
   const [lastViewedProducts, setLastViewedProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
   const navigate = useNavigate();
+
+  // Wishlist functionality
+  const { toggleWishlist, isInWishlist } = useWishlist(isLoggedIn, token);
 
   // Utility function to randomize array using Fisher-Yates shuffle
   const shuffleArray = (array) => {
@@ -126,6 +135,14 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, token }) {
     fetchProducts();
   }, []);
 
+  // Refresh products when refreshTrigger changes (e.g., after order completion)
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      console.log("Refreshing products due to refresh trigger");
+      fetchProducts();
+    }
+  }, [refreshTrigger]);
+
   // Load last viewed products from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("lastViewedProducts");
@@ -213,45 +230,51 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, token }) {
     navigate(`/product/${product._id}`);
   };
 
+  const handleWishlistToggle = async (product, e) => {
+    e.stopPropagation(); // Prevent triggering the card click
+    if (!isLoggedIn) {
+      promptLogin();
+      return;
+    }
+
+    try {
+      const result = await toggleWishlist(product);
+      setToast({ show: true, message: result.message, type: result.success ? "success" : "error" });
+    } catch (error) {
+      setToast({ show: true, message: "Please log in to use wishlist", type: "error" });
+    }
+  };
+
   if (loading)
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading products...</p>
-        </div>
-      </div>
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="400px" sx={{ color: "primary.main" }}>
+        <CircularProgress size={60} thickness={4} />
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 2, fontWeight: 500 }}>
+          Loading products...
+        </Typography>
+      </Box>
     );
 
   if (error)
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-2">⚠️</div>
-          <p className="text-red-500">{error}</p>
-        </div>
-      </div>
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="400px" sx={{ color: "error.main" }}>
+        <Typography variant="h4" sx={{ mb: 2 }}>
+          ⚠️
+        </Typography>
+        <Typography variant="body1" color="error.main" sx={{ fontWeight: 500 }}>
+          {error}
+        </Typography>
+      </Box>
     );
 
   return (
     <div className="space-y-8">
-      {/* Search and Filter */}
-
       {/* Last Viewed Products Section */}
-      {console.log("Last viewed products count:", lastViewedProducts.length)}
       {lastViewedProducts.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-8 glass-subtle rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-              </svg>
+              <MdOutlineRemoveRedEye className="w-5 h-5 text-white" />
             </div>
             <h2 className="heading-glass text-xl font-semibold tracking-tight">Last Checked Products</h2>
           </div>
@@ -278,12 +301,19 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, token }) {
                     ) : null}
                     <div className="w-full h-full flex items-center justify-center text-gray-400" style={{ display: product.images && product.images.length > 0 ? "flex" : "flex" }}>
                       <div className="text-center">
-                        <svg className="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                        </svg>
+                        <PiImageBrokenDuotone className="w-16 h-16 mx-auto mb-2" />
                         <p className="text-xs text-gray-500">No Image</p>
                       </div>
                     </div>
+
+                    {/* Wishlist Heart Button */}
+                    <button
+                      onClick={(e) => handleWishlistToggle(product, e)}
+                      className="absolute top-3 right-3 p-2 rounded-full bg-white/90 hover:bg-white transition-colors duration-200 shadow-lg"
+                      title={isInWishlist(product._id) ? "Remove from wishlist" : "Add to wishlist"}
+                    >
+                      {isInWishlist(product._id) ? <MdFavorite className="w-5 h-5 text-red-500" /> : <MdFavoriteBorder className="w-5 h-5 text-gray-600" />}
+                    </button>
 
                     {/* Quick View Overlay Button */}
                     <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -313,7 +343,6 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, token }) {
                       <span className="bg-blue-400/30 text-blue-100 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-blue-300/30">{product.brand}</span>
                       <span className="bg-purple-400/30 text-purple-100 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-purple-300/30">{product.category}</span>
                     </div>
-                    <p className="mb-4 text-glass-muted text-sm line-clamp-2 leading-relaxed tracking-tight">{product.description}</p>
 
                     <div className="flex items-center justify-between mb-4">
                       <span className="font-display font-bold text-xl text-glass tracking-tight">Rs.{product.price}</span>
@@ -389,12 +418,19 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, token }) {
                 ) : null}
                 <div className="w-full h-full flex items-center justify-center text-gray-400" style={{ display: product.images && product.images.length > 0 ? "none" : "flex" }}>
                   <div className="text-center">
-                    <svg className="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                    </svg>
+                    <PiImageBrokenDuotone className="w-16 h-16 mx-auto mb-2" />
                     <p className="text-xs text-gray-500">No Image</p>
                   </div>
                 </div>
+
+                {/* Wishlist Heart Button */}
+                <button
+                  onClick={(e) => handleWishlistToggle(product, e)}
+                  className="absolute top-3 right-3 p-2 rounded-full bg-white/90 hover:bg-white transition-colors duration-200 shadow-lg"
+                  title={isInWishlist(product._id) ? "Remove from wishlist" : "Add to wishlist"}
+                >
+                  {isInWishlist(product._id) ? <MdFavorite className="w-5 h-5 text-red-500" /> : <MdFavoriteBorder className="w-5 h-5 text-gray-600" />}
+                </button>
 
                 {/* Quick View Overlay Button */}
                 <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -494,7 +530,11 @@ export default function Home({ onAddToCart, isLoggedIn, promptLogin, token }) {
         }}
         isLoggedIn={isLoggedIn}
         promptLogin={promptLogin}
+        token={token}
       />
+
+      {/* Toast Notification */}
+      <UiToast show={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ show: false, message: "", type: "success" })} />
     </div>
   );
 }
