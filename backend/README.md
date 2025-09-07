@@ -1,3 +1,10 @@
+MONGODB_URI=mongodb+srv://admin:L5Rqtki9Q7JcZjb9@cluster0.j6aayxy.mongodb.net/nextgen-electronics
+JWT_SECRET=6fa0e978e2cf4c0ea54f824f0f53e4d195d9cd82d5123ac8e46fbd2db17dcf49
+PORT=5000
+EMAIL_SERVICE=gmail
+EMAIL_USER=roxmuhammed97@gmail.com
+EMAIL_PASS=cebw hjvj szro dgpx
+
 # NextGen Electronics Backend
 
 Node.js (Express) REST API for the NextGen Electronics platform with advanced search and filtering capabilities.

@@ -185,16 +185,6 @@ export default function Orders({ token, user }) {
                               Mark Paid
                             </UiButton>
                           )}
-                          <UiButton
-                            onClick={() => {
-                              // TODO: Implement order status update modal
-                              alert("Order status update feature coming soon!");
-                            }}
-                            color="primary"
-                            className="text-xs px-3 py-1"
-                          >
-                            Update
-                          </UiButton>
                         </div>
                       </td>
                     )}
