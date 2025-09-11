@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import UiCard from "./components/ui/UiCard";
-import UiTextField from "./components/ui/UiTextField";
-import UiButton from "./components/ui/UiButton";
-import UIValidation from "./components/ui/UIValidation";
+import UiCard from "../components/ui/UiCard";
+import UiTextField from "../components/ui/UiTextField";
+import UiButton from "../components/ui/UiButton";
+import UIValidation from "../components/ui/UIValidation";
 import { GrAddCircle } from "react-icons/gr";
 
 // Added categories array for use in the form

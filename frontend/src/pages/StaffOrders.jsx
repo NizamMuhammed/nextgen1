@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import UiCard from "./components/ui/UiCard";
-import UiButton from "./components/ui/UiButton";
+import UiCard from "../components/ui/UiCard";
+import UiButton from "../components/ui/UiButton";
 
 export default function StaffOrders({ token }) {
   const [orders, setOrders] = useState([]);

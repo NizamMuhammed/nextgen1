@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import UiTextField from "./ui/UiTextField";
-import UiButton from "./ui/UiButton";
-import UiToast from "./ui/UiToast";
-import UIValidation from "./ui/UIValidation";
+import UiTextField from "../ui/UiTextField";
+import UiButton from "../ui/UiButton";
+import UiToast from "../ui/UiToast";
+import UIValidation from "../ui/UIValidation";
 
 export default function OtpVerification({ email, onVerificationSuccess, onBack }) {
   const [otp, setOtp] = useState("");

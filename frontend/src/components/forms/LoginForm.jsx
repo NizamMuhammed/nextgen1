@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import UiTextField from "./components/ui/UiTextField";
-import UiButton from "./components/ui/UiButton";
-import UIValidation from "./components/ui/UIValidation";
-import UiToast from "./components/ui/UiToast";
+import UiTextField from "../ui/UiTextField";
+import UiButton from "../ui/UiButton";
+import UIValidation from "../ui/UIValidation";
+import UiToast from "../ui/UiToast";
 
 export default function LoginForm({ onLogin, switchToSignup }) {
   const [form, setForm] = useState({ email: "", password: "" });

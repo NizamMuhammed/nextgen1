@@ -52,7 +52,7 @@ export default function UiProductModal({ product, open, onClose, onAddToCart, is
           {/* Product Images */}
           <div className="space-y-4">
             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-              {product.images && product.images.length > 0 ? (
+              {product.images && product.images.length > 0 && product.images[selectedImage] ? (
                 <img
                   src={product.images[selectedImage].startsWith("http") ? product.images[selectedImage] : `http://localhost:5000${product.images[selectedImage]}`}
                   alt={product.name}
@@ -86,7 +86,7 @@ export default function UiProductModal({ product, open, onClose, onAddToCart, is
                     className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 ${selectedImage === index ? "border-blue-500" : "border-gray-200"}`}
                   >
                     <img
-                      src={image.startsWith("http") ? image : `http://localhost:5000${image}`}
+                      src={image && image.startsWith("http") ? image : `http://localhost:5000${image || ""}`}
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {

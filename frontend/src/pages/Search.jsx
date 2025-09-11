@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import UiCard from "./components/ui/UiCard";
-import UiButton from "./components/ui/UiButton";
-import UiSearchFilter from "./components/ui/UiSearchFilter";
+import UiButton from "../components/ui/UiButton";
+import UiSearchFilter from "../components/ui/UiSearchFilter";
+import UiProductModal from "../components/ui/UiProductModal";
+import ProductCard from "../components/ProductCard";
 
 export default function Search({ onAddToCart, isLoggedIn, promptLogin, refreshTrigger }) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11,6 +12,8 @@ export default function Search({ onAddToCart, isLoggedIn, promptLogin, refreshTr
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const initialFilters = useMemo(
     () => ({
@@ -135,13 +138,18 @@ export default function Search({ onAddToCart, isLoggedIn, promptLogin, refreshTr
     fetchProducts(newFilters);
   };
 
+  const openProductModal = (product) => {
+    setSelectedProduct(product);
+    setShowModal(true);
+  };
+
+  const closeProductModal = () => {
+    setShowModal(false);
+    setSelectedProduct(null);
+  };
+
   return (
     <div className="space-y-8">
-      <div className="text-center mb-2">
-        <h1 className="heading-glass text-3xl font-bold tracking-tight">Search</h1>
-        <p className="text-glass-muted">Use filters to refine results</p>
-      </div>
-
       <UiSearchFilter categories={categories} brands={brands} onSearch={handleSearch} onFilter={handleFilterChange} />
 
       {loading && (
@@ -168,71 +176,17 @@ export default function Search({ onAddToCart, isLoggedIn, promptLogin, refreshTr
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
-              <UiCard key={product._id} className="flex flex-col h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="flex-1">
-                  <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden cursor-pointer group relative">
-                    {product.images && product.images.length > 0 ? (
-                      <img
-                        src={product.images[0].startsWith("http") ? product.images[0] : `http://localhost:5000${product.images[0]}`}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.nextSibling.style.display = "flex";
-                        }}
-                        onLoad={(e) => {
-                          e.target.nextSibling.style.display = "none";
-                        }}
-                      />
-                    ) : null}
-                    <div className="w-full h-full flex items-center justify-center text-gray-400" style={{ display: product.images && product.images.length > 0 ? "none" : "flex" }}>
-                      <div className="text-center">
-                        <svg className="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                        </svg>
-                        <p className="text-xs text-gray-500">No Image</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-4">
-                    <h2 className="font-display font-semibold text-lg mb-3 text-glass tracking-tight leading-tight">{product.name}</h2>
-                    <div className="text-sm mb-4 flex flex-wrap gap-2">
-                      <span className="bg-blue-400/30 text-blue-100 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-blue-300/30">{product.brand}</span>
-                      <span className="bg-purple-400/30 text-purple-100 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-purple-300/30">{product.category}</span>
-                    </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="font-display font-bold text-xl text-glass tracking-tight">Rs.{product.price}</span>
-                      <span
-                        className={`text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm border ${
-                          (product.stock || 0) > 0 ? "bg-green-400/30 text-green-100 border-green-300/30" : "bg-red-400/30 text-red-100 border-red-300/30"
-                        }`}
-                      >
-                        {(product.stock || 0) > 0 ? `In Stock (${product.stock})` : "Out of Stock"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 pt-0">
-                  <UiButton
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      if (!isLoggedIn) {
-                        promptLogin();
-                      } else {
-                        onAddToCart(product);
-                      }
-                    }}
-                    disabled={(product.stock || 0) === 0}
-                    className="w-full"
-                  >
-                    {(product.stock || 0) === 0 ? "Out of Stock" : "Add to Cart"}
-                  </UiButton>
-                </div>
-              </UiCard>
+              <ProductCard
+                key={product._id}
+                product={product}
+                onAddToCart={onAddToCart}
+                isLoggedIn={isLoggedIn}
+                promptLogin={promptLogin}
+                onQuickView={openProductModal}
+                showWishlist={false}
+                showQuickView={true}
+                showDescription={false}
+              />
             ))}
           </div>
 
@@ -251,6 +205,22 @@ export default function Search({ onAddToCart, isLoggedIn, promptLogin, refreshTr
           )}
         </>
       )}
+
+      {/* Product Modal */}
+      <UiProductModal
+        product={selectedProduct}
+        open={showModal}
+        onClose={closeProductModal}
+        onAddToCart={(product) => {
+          if (!isLoggedIn) {
+            promptLogin();
+          } else {
+            onAddToCart(product);
+          }
+        }}
+        isLoggedIn={isLoggedIn}
+        promptLogin={promptLogin}
+      />
     </div>
   );
 }

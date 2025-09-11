@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import UiCard from "./components/ui/UiCard";
-import UiButton from "./components/ui/UiButton";
+import UiCard from "../components/ui/UiCard";
+import UiButton from "../components/ui/UiButton";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({

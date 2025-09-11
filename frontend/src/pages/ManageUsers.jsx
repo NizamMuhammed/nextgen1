@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import UiCard from "./components/ui/UiCard";
-import UiTextField from "./components/ui/UiTextField";
-import UiButton from "./components/ui/UiButton";
-import UIValidation from "./components/ui/UIValidation";
+import UiCard from "../components/ui/UiCard";
+import UiTextField from "../components/ui/UiTextField";
+import UiButton from "../components/ui/UiButton";
+import UIValidation from "../components/ui/UIValidation";
 import { AiOutlineUserAdd } from "react-icons/ai";
 
 export default function ManageUsers({ token, user: currentUser }) {

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import UiCard from "./components/ui/UiCard";
-import UiButton from "./components/ui/UiButton";
-import UiToast from "./components/ui/UiToast";
-import { useWishlist } from "./hooks/useWishlist";
+import UiCard from "../components/ui/UiCard";
+import UiButton from "../components/ui/UiButton";
+import UiToast from "../components/ui/UiToast";
+import { useWishlist } from "../hooks/useWishlist";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
-import ReviewSubmission from "./components/ReviewSubmission";
-import ReviewDisplay from "./components/ReviewDisplay";
+import ReviewSubmission from "../components/ReviewSubmission";
+import ReviewDisplay from "../components/ReviewDisplay";
 
 export default function ProductDetails({ onAddToCart, isLoggedIn, promptLogin, token, refreshTrigger }) {
   const [product, setProduct] = useState(null);
@@ -155,7 +155,7 @@ export default function ProductDetails({ onAddToCart, isLoggedIn, promptLogin, t
           {/* Left: Gallery */}
           <div className="space-y-4">
             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-              {product.images && product.images.length > 0 ? (
+              {product.images && product.images.length > 0 && product.images[selectedImage] ? (
                 <img
                   src={product.images[selectedImage].startsWith("http") ? product.images[selectedImage] : `http://localhost:5000${product.images[selectedImage]}`}
                   alt={product.name}
@@ -188,7 +188,7 @@ export default function ProductDetails({ onAddToCart, isLoggedIn, promptLogin, t
                     className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 ${selectedImage === index ? "border-blue-500" : "border-gray-200"}`}
                   >
                     <img
-                      src={image.startsWith("http") ? image : `http://localhost:5000${image}`}
+                      src={image && image.startsWith("http") ? image : `http://localhost:5000${image || ""}`}
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {

@@ -170,7 +170,7 @@ export default function UiWishlist({ isLoggedIn, promptLogin, token, onAddToCart
               <div className="flex-1">
                 {/* Product Image (go to details page) */}
                 <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden cursor-pointer group relative" onClick={() => handleProductClick(product)}>
-                  {product.images && product.images.length > 0 ? (
+                  {product.images && product.images.length > 0 && product.images[0] ? (
                     <img
                       src={product.images[0].startsWith("http") ? product.images[0] : `http://localhost:5000${product.images[0]}`}
                       alt={product.name}

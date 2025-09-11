@@ -168,7 +168,7 @@ export default function ReviewDisplay({ productId, isLoggedIn, token }) {
                     {review.images.map((image, index) => (
                       <img
                         key={index}
-                        src={image.startsWith("http") ? image : `http://localhost:5000${image}`}
+                        src={image && image.startsWith("http") ? image : `http://localhost:5000${image || ""}`}
                         alt={`Review image ${index + 1}`}
                         className="w-20 h-20 object-cover rounded-lg border border-white/20"
                         onError={(e) => {

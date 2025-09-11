@@ -1,25 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import SignupForm from "./SignupForm";
-import LoginForm from "./LoginForm";
-import Home from "./Home";
-import Cart from "./Cart";
-import ManageProducts from "./ManageProducts";
-import ManageUsers from "./ManageUsers";
-import StaffOrders from "./StaffOrders";
-import Dashboard from "./Dashboard";
+import SignupForm from "./components/forms/SignupForm";
+import LoginForm from "./components/forms/LoginForm";
+import Home from "./pages/Home";
+import Cart from "./pages/Cart";
+import ManageProducts from "./pages/ManageProducts";
+import ManageUsers from "./pages/ManageUsers";
+import StaffOrders from "./pages/StaffOrders";
+import Dashboard from "./pages/Dashboard";
 import UiWishlist from "./components/ui/UiWishlist";
 import UiOrderTracking from "./components/ui/UiOrderTracking";
-import Checkout from "./Checkout";
-import Orders from "./Orders";
-import ProductDetails from "./ProductDetails";
-import Search from "./Search";
-import UserSettings from "./UserSettings";
+import Checkout from "./pages/Checkout";
+import Orders from "./pages/Orders";
+import ProductDetails from "./pages/ProductDetails";
+import Search from "./pages/Search";
+import UserSettings from "./pages/UserSettings";
+import About from "./pages/About";
+import Products from "./pages/Products";
+import Categories from "./pages/Categories";
+import Brands from "./pages/Brands";
+import Deals from "./pages/Deals";
+import Contact from "./pages/Contact";
+import Shipping from "./pages/Shipping";
+import Returns from "./pages/Returns";
+import SizeGuide from "./pages/SizeGuide";
+import FAQ from "./pages/FAQ";
 import UiDialog from "./components/ui/UiDialog";
 import UiButton from "./components/ui/UiButton";
 import UiFooter from "./components/ui/UiFooter";
 import UiNavBar from "./components/ui/UiNavBar";
 import UiToast from "./components/ui/UiToast";
+import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -29,6 +40,7 @@ function App() {
   const [showSignup, setShowSignup] = useState(false);
   const [productRefreshTrigger, setProductRefreshTrigger] = useState(0); // Trigger for product refreshes
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [showGoTop, setShowGoTop] = useState(false);
 
   // Check token and fetch user data on app initialization
   useEffect(() => {
@@ -62,6 +74,27 @@ function App() {
 
     checkAuthStatus();
   }, []);
+
+  // Show "Go to Top" button on scroll
+  useEffect(() => {
+    const onScroll = () => {
+      try {
+        const y = window.scrollY || document.documentElement.scrollTop || 0;
+        setShowGoTop(y > 300);
+      } catch (_) {}
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    try {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (_) {
+      window.scrollTo(0, 0);
+    }
+  };
 
   // Add to cart handler
   const handleAddToCart = (product) => {
@@ -150,7 +183,17 @@ function App() {
 
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6 relative z-10">
           <Routes>
-            <Route path="/" element={<Home onAddToCart={handleAddToCart} isLoggedIn={!!user} promptLogin={promptLogin} token={token} refreshTrigger={productRefreshTrigger} />} />
+            <Route path="/" element={<Home onAddToCart={handleAddToCart} isLoggedIn={!!user} promptLogin={promptLogin} token={token} refreshTrigger={productRefreshTrigger} user={user} />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/products" element={<Products onAddToCart={handleAddToCart} isLoggedIn={!!user} promptLogin={promptLogin} token={token} />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/brands" element={<Brands />} />
+            <Route path="/deals" element={<Deals onAddToCart={handleAddToCart} isLoggedIn={!!user} promptLogin={promptLogin} />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/shipping" element={<Shipping />} />
+            <Route path="/returns" element={<Returns />} />
+            <Route path="/size-guide" element={<SizeGuide />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/search" element={<Search onAddToCart={handleAddToCart} isLoggedIn={!!user} promptLogin={promptLogin} refreshTrigger={productRefreshTrigger} />} />
             <Route
               path="/product/:productId"
@@ -262,6 +305,17 @@ function App() {
 
         {/* Footer */}
         <UiFooter />
+
+        {/* Go to Top Button */}
+        {showGoTop && (
+          <button
+            onClick={scrollToTop}
+            aria-label="Go to top"
+            className="fixed bottom-6 right-6 z-50 rounded-full p-3 bg-white/10 border border-white/20 text-glass hover:text-white hover:bg-white/20 backdrop-blur shadow-lg transition-colors"
+          >
+            <ArrowUpwardOutlinedIcon fontSize="small" />
+          </button>
+        )}
 
         {/* Toast Notification */}
         <UiToast show={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ show: false, message: "", type: "success" })} />

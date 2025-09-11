@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import UiCard from "./components/ui/UiCard";
-import UiButton from "./components/ui/UiButton";
-import UiDropdown from "./components/ui/UiDropdown";
+import UiCard from "../components/ui/UiCard";
+import UiButton from "../components/ui/UiButton";
+import UiDropdown from "../components/ui/UiDropdown";
 
 export default function Orders({ token, user }) {
   const [orders, setOrders] = useState([]);

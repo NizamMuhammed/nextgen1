@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import UiTextField from "./components/ui/UiTextField";
-import UiButton from "./components/ui/UiButton";
-import UiToast from "./components/ui/UiToast";
-import UIValidation from "./components/ui/UIValidation";
-import OtpVerification from "./components/OtpVerification";
+import UiTextField from "../ui/UiTextField";
+import UiButton from "../ui/UiButton";
+import UiToast from "../ui/UiToast";
+import UIValidation from "../ui/UIValidation";
+import OtpVerification from "./OtpVerification";
 
 export default function SignupForm({ onSignup, switchToLogin }) {
   const [form, setForm] = useState({

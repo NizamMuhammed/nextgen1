@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import UiCard from "./components/ui/UiCard";
-import UiButton from "./components/ui/UiButton";
-import UiToast from "./components/ui/UiToast";
+import UiCard from "../components/ui/UiCard";
+import UiButton from "../components/ui/UiButton";
+import UiToast from "../components/ui/UiToast";
 
 export default function Cart({ cart, onRemove, isLoggedIn, promptLogin }) {
   const [isRemoving, setIsRemoving] = useState(false);

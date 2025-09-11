@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import UiCard from "./components/ui/UiCard";
-import UiTextField from "./components/ui/UiTextField";
-import UiButton from "./components/ui/UiButton";
-import UIValidation from "./components/ui/UIValidation";
+import UiCard from "../components/ui/UiCard";
+import UiTextField from "../components/ui/UiTextField";
+import UiButton from "../components/ui/UiButton";
+import UIValidation from "../components/ui/UIValidation";
 
 export default function Checkout({ cart, token, onOrderSuccess, onClearCart, onRefreshProducts }) {
   const [shipping, setShipping] = useState({

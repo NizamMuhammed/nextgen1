@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import UiButton from "./UiButton";
-import Logo from "../../pics/NextGen Electronics.png";
+import Logo from "../../assets/NextGen Electronics.png";
 import { FaSearch } from "react-icons/fa";
 import { GoPackage } from "react-icons/go";
 import { LuLayoutDashboard } from "react-icons/lu";
@@ -42,6 +42,14 @@ export default function UiNavBar({ user, cart, onShowLogin, onShowSignup, onLogo
     setIsMobileMenuOpen(false);
   };
 
+  const handleLogoClick = () => {
+    if (user && user.role === "staff") {
+      handleNavigation("/orders");
+    } else {
+      handleNavigation("/");
+    }
+  };
+
   return (
     <nav className="w-full glass backdrop-blur-xl shadow-lg border-b border-white/20 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -51,7 +59,7 @@ export default function UiNavBar({ user, cart, onShowLogin, onShowSignup, onLogo
             className={`flex items-center gap-3 font-display font-bold text-xl cursor-pointer heading-glass transition-all duration-300 ease-in-out hover:scale-105 transform ${
               location.pathname === "/" ? "text-glass" : "text-glass-muted"
             }`}
-            onClick={() => handleNavigation("/")}
+            onClick={handleLogoClick}
           >
             <img src={Logo} alt="NextGen Electronics" className="w-10 h-10 transition-transform duration-300 ease-in-out hover:scale-110" />
             <span className="hidden sm:block transition-all duration-300 ease-in-out">NextGen Electronics</span>
@@ -349,7 +357,7 @@ export default function UiNavBar({ user, cart, onShowLogin, onShowSignup, onLogo
           <div className="md:hidden glass-strong rounded-lg mt-2 border border-white/20 animate-in slide-in-from-top-2">
             <div className="px-2 py-2 space-y-1">
               <div
-                onClick={() => handleNavigation("/")}
+                onClick={handleLogoClick}
                 className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
                   location.pathname === "/" ? "bg-white/10" : ""
                 }`}
@@ -445,6 +453,14 @@ export default function UiNavBar({ user, cart, onShowLogin, onShowSignup, onLogo
 
               {user && user.role === "staff" && (
                 <>
+                  <div
+                    onClick={() => handleNavigation("/orders")}
+                    className={`flex items-center w-full px-3 py-2 text-glass-muted hover:text-glass hover:bg-white/10 rounded-lg transition-all duration-200 font-medium cursor-pointer ${
+                      location.pathname === "/orders" ? "bg-white/10" : ""
+                    }`}
+                  >
+                    📄 Orders
+                  </div>
                   <div className="border-t border-white/10 my-1"></div>
                   <div
                     onClick={() => handleNavigation("/manage-products")}
