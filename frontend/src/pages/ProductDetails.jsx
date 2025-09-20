@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import UiCard from "../components/ui/UiCard";
 import UiButton from "../components/ui/UiButton";
 import UiToast from "../components/ui/UiToast";
@@ -18,6 +18,8 @@ export default function ProductDetails({ onAddToCart, isLoggedIn, promptLogin, t
   const [reviewsRefreshTrigger, setReviewsRefreshTrigger] = useState(0);
   const { productId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const reviewsSectionRef = useRef(null);
 
   // Wishlist functionality
   const { toggleWishlist, isInWishlist } = useWishlist(isLoggedIn, token);
@@ -40,6 +42,20 @@ export default function ProductDetails({ onAddToCart, isLoggedIn, promptLogin, t
   useEffect(() => {
     if (productId) fetchProduct();
   }, [productId]);
+
+  // Handle scroll to reviews section when focus=reviews parameter is present
+  useEffect(() => {
+    const focusParam = searchParams.get("focus");
+    if (focusParam === "reviews" && reviewsSectionRef.current) {
+      // Small delay to ensure the page has loaded
+      setTimeout(() => {
+        reviewsSectionRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 500);
+    }
+  }, [searchParams, product]);
 
   // Refresh product when refreshTrigger changes (e.g., after order completion)
   useEffect(() => {
@@ -286,7 +302,7 @@ export default function ProductDetails({ onAddToCart, isLoggedIn, promptLogin, t
       </UiCard>
 
       {/* Reviews Section */}
-      <div className="space-y-6">
+      <div ref={reviewsSectionRef} className="space-y-6">
         <h2 className="heading-glass text-2xl font-bold tracking-tight">Reviews & Ratings</h2>
 
         {/* Review Submission */}

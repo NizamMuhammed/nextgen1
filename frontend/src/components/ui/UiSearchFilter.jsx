@@ -150,15 +150,6 @@ export default function UiSearchFilter({ onSearch, onFilter, categories, brands 
 
   return (
     <div className="glass p-6 rounded-xl shadow-lg">
-      <div className="flex items-center mb-6">
-        <div className="w-8 h-8 glass-subtle rounded-lg flex items-center justify-center mr-3">
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-        <h3 className="heading-glass text-xl font-semibold tracking-tight">Search & Filter Products</h3>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {/* Search */}
         <div className="lg:col-span-2 relative">

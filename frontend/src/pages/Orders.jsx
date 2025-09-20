@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import UiCard from "../components/ui/UiCard";
 import UiButton from "../components/ui/UiButton";
 import UiDropdown from "../components/ui/UiDropdown";
@@ -7,6 +8,7 @@ export default function Orders({ token, user }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -28,6 +30,11 @@ export default function Orders({ token, user }) {
   useEffect(() => {
     if (token) fetchOrders();
   }, [token]);
+
+  const handleReviewProduct = (productId) => {
+    // Navigate to product details page with review section focus
+    navigate(`/product/${productId}?focus=reviews`);
+  };
 
   if (!token) {
     return (
@@ -74,7 +81,7 @@ export default function Orders({ token, user }) {
                   <th className="text-left py-4 px-6 text-glass font-semibold">Total</th>
                   <th className="text-left py-4 px-6 text-glass font-semibold">Status</th>
                   <th className="text-left py-4 px-6 text-glass font-semibold">Payment</th>
-                  {(user?.role === "staff" || user?.role === "admin") && <th className="text-left py-4 px-6 text-glass font-semibold">Actions</th>}
+                  <th className="text-left py-4 px-6 text-glass font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -160,34 +167,44 @@ export default function Orders({ token, user }) {
                         {order.isPaid ? "Paid" : "Unpaid"}
                       </span>
                     </td>
-                    {(user?.role === "staff" || user?.role === "admin") && (
-                      <td className="py-4 px-6">
-                        <div className="flex gap-2">
-                          {!order.isPaid && (
-                            <UiButton
-                              onClick={async () => {
-                                try {
-                                  const res = await fetch(`http://localhost:5000/api/orders/${order._id}/pay`, {
-                                    method: "PUT",
-                                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                                    body: JSON.stringify({ paymentResult: { id: "demo", status: "COMPLETED" } }),
-                                  });
-                                  const data = await res.json();
-                                  if (!res.ok) throw new Error(data.error || "Failed to mark as paid");
-                                  fetchOrders();
-                                } catch (err) {
-                                  alert(err.message);
-                                }
-                              }}
-                              color="success"
-                              className="text-xs px-3 py-1"
-                            >
-                              Mark Paid
-                            </UiButton>
-                          )}
-                        </div>
-                      </td>
-                    )}
+                    <td className="py-4 px-6">
+                      <div className="flex gap-2 flex-wrap">
+                        {/* Review button for delivered orders (all users) */}
+                        {order.status === "delivered" && order.orderItems && order.orderItems.length > 0 && (
+                          <UiButton onClick={() => handleReviewProduct(order.orderItems[0].product)} color="primary" className="text-xs px-3 py-1" title="Review this product">
+                            ⭐ Review
+                          </UiButton>
+                        )}
+
+                        {/* Staff/Admin actions */}
+                        {(user?.role === "staff" || user?.role === "admin") && (
+                          <>
+                            {!order.isPaid && (
+                              <UiButton
+                                onClick={async () => {
+                                  try {
+                                    const res = await fetch(`http://localhost:5000/api/orders/${order._id}/pay`, {
+                                      method: "PUT",
+                                      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                                      body: JSON.stringify({ paymentResult: { id: "demo", status: "COMPLETED" } }),
+                                    });
+                                    const data = await res.json();
+                                    if (!res.ok) throw new Error(data.error || "Failed to mark as paid");
+                                    fetchOrders();
+                                  } catch (err) {
+                                    alert(err.message);
+                                  }
+                                }}
+                                color="success"
+                                className="text-xs px-3 py-1"
+                              >
+                                Mark Paid
+                              </UiButton>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

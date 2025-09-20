@@ -161,19 +161,6 @@ export default function Search({ onAddToCart, isLoggedIn, promptLogin, refreshTr
 
       {!loading && !error && (
         <>
-          <div className="flex items-center justify-between glass-subtle p-4 rounded-xl border border-white/20">
-            <p className="text-glass font-medium tracking-tight">
-              Showing <span className="font-semibold text-glass">{products.length}</span> of
-              <span className="font-semibold text-glass"> {pagination.totalProducts}</span> products
-            </p>
-            {pagination.totalPages > 1 && (
-              <p className="text-glass-muted font-medium tracking-tight">
-                Page <span className="font-semibold text-glass">{pagination.currentPage}</span> of
-                <span className="font-semibold text-glass"> {pagination.totalPages}</span>
-              </p>
-            )}
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
               <ProductCard

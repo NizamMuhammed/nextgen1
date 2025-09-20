@@ -20,6 +20,7 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import { FaTiktok } from "react-icons/fa";
+import Logo from "../../assets/NextGen Electronics.png";
 
 export default function UiFooter() {
   const currentYear = new Date().getFullYear();
@@ -40,7 +41,17 @@ export default function UiFooter() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-glass">✨ NextGen Electronics</h3>
+            {/* Logo/Brand */}
+            <div
+              className={`flex items-center gap-3 font-display font-bold text-xl cursor-pointer heading-glass transition-all duration-300 ease-in-out hover:scale-105 transform ${
+                location.pathname === "/" ? "text-glass" : "text-glass-muted"
+              }`}
+              onClick={() => handleNavigation("/")}
+            >
+              <img src={Logo} alt="NextGen Electronics" className="w-10 h-10 transition-transform duration-300 ease-in-out hover:scale-110" />
+              <span className="hidden sm:block transition-all duration-300 ease-in-out">NextGen Electronics</span>
+              <span className="sm:hidden transition-all duration-300 ease-in-out">NextGen</span>
+            </div>{" "}
             <p className="text-glass-muted text-sm leading-relaxed">Your trusted source for cutting-edge electronics and smart devices. Quality products, competitive prices, exceptional service.</p>
             <div className="flex space-x-4">
               <a

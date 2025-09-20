@@ -14,7 +14,7 @@ export default function UiOrderTracking() {
   const handleOrderNumberChange = (e) => {
     const value = e.target.value;
     setOrderNumber(value);
-    
+
     // Clear validation error when user starts typing
     if (validationErrors.orderNumber) {
       setValidationErrors((prev) => ({ ...prev, orderNumber: null }));
@@ -24,7 +24,7 @@ export default function UiOrderTracking() {
   const handleEmailChange = (e) => {
     const value = e.target.value;
     setEmail(value);
-    
+
     // Clear validation error when user starts typing
     if (validationErrors.email) {
       setValidationErrors((prev) => ({ ...prev, email: null }));
@@ -52,7 +52,7 @@ export default function UiOrderTracking() {
 
   const handleTrackOrder = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -117,31 +117,18 @@ export default function UiOrderTracking() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Track Your Order</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center text-white">Track Your Order</h1>
 
       <UiCard className="max-w-2xl mx-auto">
         <form onSubmit={handleTrackOrder} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="relative">
-              <UiTextField 
-                label="Order Number" 
-                value={orderNumber} 
-                onChange={handleOrderNumberChange} 
-                placeholder="Enter your order number" 
-                required 
-              />
+              <UiTextField label="Order Number" value={orderNumber} onChange={handleOrderNumberChange} placeholder="Enter your order number" required />
               <UIValidation message={validationErrors.orderNumber} position="top" type="error" visible={!!validationErrors.orderNumber} />
             </div>
-            
+
             <div className="relative">
-              <UiTextField 
-                label="Email Address" 
-                type="email" 
-                value={email} 
-                onChange={handleEmailChange} 
-                placeholder="Enter your email" 
-                required 
-              />
+              <UiTextField label="Email Address" type="email" value={email} onChange={handleEmailChange} placeholder="Enter your email" required />
               <UIValidation message={validationErrors.email} position="top" type="error" visible={!!validationErrors.email} />
             </div>
           </div>

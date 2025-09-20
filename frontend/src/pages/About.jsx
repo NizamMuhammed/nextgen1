@@ -1,5 +1,7 @@
 import React from "react";
 import UiCard from "../components/ui/UiCard";
+import Logo from "../assets/NextGen.png";
+
 import { FaUsers, FaAward, FaShippingFast, FaHeadset, FaShieldAlt, FaRocket, FaGlobe, FaHeart, FaLightbulb, FaCog } from "react-icons/fa";
 
 export default function About() {
@@ -45,10 +47,11 @@ export default function About() {
 
   const team = [
     {
-      name: "Sarah Johnson",
+      name: "Nizam Muhammed",
       role: "CEO & Founder",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
-      description: "Visionary leader with 15+ years in tech industry",
+      image:
+        "https://media.licdn.com/dms/image/v2/D5603AQH2vADKxW151w/profile-displayphoto-crop_800_800/B56ZlLVJNcJsAI-/0/1757905459068?e=1761177600&v=beta&t=OXF2n8TSq_D-pd__oFTtK4m4_ecxId4XQ5s0JtHcnws",
+      description: "Visionary leader, versatile full stack developer, and tech lead with over 5 years of experience in the technology industry.",
     },
     {
       name: "Michael Chen",
@@ -107,7 +110,7 @@ export default function About() {
             </div>
             <div className="relative">
               <div className="aspect-square bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl p-8 flex items-center justify-center">
-                <FaGlobe className="w-32 h-32 text-blue-400/50" />
+                <img src={Logo} alt="NextGen Electronics" className="w-full h-full text-blue-400/50" />
               </div>
             </div>
           </div>
